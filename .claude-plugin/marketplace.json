@@ -1,0 +1,15 @@
+{
+  "name": "pcfhub",
+  "description": "Tooling for Power Apps component framework controls — writing the control, scaffolding from PCFHub's shared template, the manifest and docs contract the hub (pcfhub.dev) ingests, and the review, next-version and release steps.",
+  "owner": {
+    "name": "PCFHub",
+    "url": "https://github.com/pcfhub"
+  },
+  "plugins": [
+    {
+      "name": "pcfhub-controls",
+      "source": "./",
+      "description": "Build, review, and ship PCF code components that publish to PCFHub."
+    }
+  ]
+}

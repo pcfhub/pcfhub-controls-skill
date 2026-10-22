@@ -1,0 +1,23 @@
+name: A trap nothing warns about
+description: Something a PCF control met that the skills do not cover.
+body:
+  - type: textarea
+    id: trap
+    attributes:
+      label: What went wrong
+      description: The symptom first, as a maker or an author would see it — then the cause, if you found it.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: How you know
+      description: What you ran, on which host and when. A repository or commit that shows it is better than a description of one.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where it would belong
+      description: The skill and reference you looked in first, if any.
+      placeholder: "pcf-controls/references/dataset.md"

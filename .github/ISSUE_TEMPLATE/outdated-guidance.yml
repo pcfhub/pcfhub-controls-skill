@@ -1,0 +1,45 @@
+name: Guidance that is wrong or out of date
+description: A reference says one thing and the platform, a host or the hub does another.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The references are only worth reading because what they say was watched happening, so a correction is the most useful issue there is. Say what you saw, where, and when — the same evidence a reference carries.
+  - type: input
+    id: where
+    attributes:
+      label: Where the skills say it
+      description: The skill and file, and the section or bold rule if you can.
+      placeholder: "pcf-controls/references/dates.md — A canvas app states a behaviour for no column"
+    validations:
+      required: true
+  - type: textarea
+    id: says
+    attributes:
+      label: What it says
+    validations:
+      required: true
+  - type: textarea
+    id: saw
+    attributes:
+      label: What you saw instead
+      description: What you ran, and what came back — console output, a screenshot, the probe's answer verbatim.
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host, and when
+      description: Model-driven form, canvas app (Studio or the published player), Power Apps grid, Power Pages — and the date.
+      placeholder: "Model-driven form, Information form on account, 2026-10-21"
+    validations:
+      required: true
+  - type: dropdown
+    id: measured
+    attributes:
+      label: Measured or read?
+      options:
+        - Measured — I ran it and watched
+        - Read — from documentation, typings or another control's code
+    validations:
+      required: true

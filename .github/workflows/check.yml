@@ -1,0 +1,34 @@
+name: Check
+
+# Everything a change to the skills can break without a single test failing:
+# a pointer into a reference that no longer lands, a reference no step routes
+# to, a file name two skills share, a description past the 1,024 characters
+# the Agent Skills format allows, and a plugin or marketplace manifest Claude
+# Code would refuse. None of it builds, so none of it fails on its own.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - name: Every pointer into a skill's references lands
+        run: node scripts/check-references.mjs
+
+      # Claude Code's own validator, pinned: an unpinned one could start
+      # refusing a manifest nobody changed. It needs no sign-in to validate.
+      - name: Claude Code accepts the marketplace and the plugin
+        run: |
+          npx --yes @anthropic-ai/claude-code@2.1.235 plugin validate .
+          npx --yes @anthropic-ai/claude-code@2.1.235 plugin validate .claude-plugin/plugin.json

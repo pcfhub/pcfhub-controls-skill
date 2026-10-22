@@ -1,0 +1,213 @@
+# Accessibility
+
+What a control owes a keyboard and a screen reader on a model-driven form: the
+Tab the form keeps, a tree or list of its own with one tab stop and the
+WAI-ARIA keys (the template's `lib/tree-keys`), and live regions.
+
+Split out of `styling-and-accessibility.md` on 15 Oct 2026, so each file can be
+read whole.
+
+- [Accessibility](#accessibility)
+  - [A model-driven form keeps Tab](#a-model-driven-form-keeps-tab)
+  - [A tree or a list of your own: one tab stop, arrows inside](#a-tree-or-a-list-of-your-own-one-tab-stop-arrows-inside)
+  - [Live regions: announce the change, not the value](#live-regions-announce-the-change-not-the-value)
+
+## Accessibility
+
+The hub publishes these controls to people who will put them on production
+forms, so keyboard and screen-reader support is table stakes rather than polish.
+
+- Every mouse interaction needs a keyboard equivalent. A chip with a mouse-only
+  remove button is unusable without a pointer.
+- Manage focus explicitly when the control changes what is on screen — opening
+  a picker, removing the focused item.
+- Use real semantics (`button`, `input`, `role`, `aria-label`) rather than
+  clickable `div`s. Fluent components already do this; hand-rolled DOM does not.
+- Respect the host theme rather than hard-coding colours, or the control will
+  fail contrast in dark mode and in themed environments. *Styling* above is how:
+  Fluent's tokens with literal fallbacks, and the dark set chosen from
+  `fluentDesignLanguage.isDarkTheme` rather than from the operating system.
+- A focus indicator on every tab stop, and the right one for where it sits —
+  Fluent's underline inside a field surface, its two-ring outline anywhere else.
+  `:focus-visible`, so a mouse click leaves nothing behind.
+- An icon-only control carries `aria-label` **and** `title`. The label is for
+  anything that reads text; the tooltip is for the sighted user who does not
+  recognise the glyph, and neither substitutes for the other.
+- Anything that means something by colour has to mean it another way too — a
+  word, an icon, a shape. Three coloured states with no labels are three
+  identical states under `forced-colors: active`, where every tint collapses to
+  a system keyword.
+
+### A model-driven form keeps Tab
+
+On a model-driven form, Tab never reaches a control: the form moves focus to
+the next field first. Measured on the Accounts form with `pcf-code-editor`'s
+1.3.11 probe (2026-09-26) — a key log inside the editor recorded the Space
+pressed after Tab and nothing for the Tab, while focus had moved on. So on a
+form:
+
+- **Never make Tab do something inside the control** — take a suggestion,
+  indent, move between cells. Give it another key (Enter takes a suggestion)
+  and say so in the docs.
+- **A "release Tab" switch has nothing to release.** Monaco's `Ctrl+M`
+  toggled a mode no Tab ever arrived to use.
+- **The dev harness lets Tab through**, so it cannot show this; only the form
+  can. In a canvas app it is unmeasured.
+
+That is also the accessible default: Tab moving between fields is what a
+keyboard user of a form expects.
+
+### A tree or a list of your own: one tab stop, arrows inside
+
+A control that draws many choosable things of its own — a tree, a list of
+rows, a grid it renders itself — is a *composite widget*, and the keyboard
+contract is the WAI-ARIA pattern's, not a tab stop per row. Tab reaches the
+widget once (and leaves it once — the form keeps Tab anyway, above); the
+arrows move inside it. A tree of forty thousand nodes with forty thousand tab
+stops is a page nobody can leave.
+
+**The keys a form lets through.** `pcf-code-editor`'s 1.6.9 probe put a
+focusable `role="tree"` element inside the control on the account form and
+pressed every key the pattern uses (2026-10-11): ↑ ↓ ← → Home End Enter Space
+`*` a letter Ctrl+C F2 Escape. Every one reached the element's own listener
+and bubbled back to the window; none arrived prevented, nothing scrolled, no
+dialog opened, the record stayed unchanged. So the whole pattern is available
+on a form — and the control has to `preventDefault()` the keys it takes, or
+Space and the arrows also scroll whatever is scrollable. Leave the rest alone:
+Escape, F2 and every shortcut but the widget's own are the host's.
+
+**The tree's map** (APG *Tree View*), as `pcf-code-editor` 1.7.0 ships it:
+
+| Key | Does |
+|---|---|
+| ↓ ↑ | Next / previous row on show |
+| → | Opens a closed node; on an open one, to its first child; on a leaf, nothing — but still taken |
+| ← | Closes an open node; otherwise to its parent |
+| Home, End, Page Up, Page Down | First, last, a page |
+| `*` | Opens every sibling that can open; focus stays |
+| Enter | The row's action (for Code Editor: back to the node's text) |
+| A printable character | Type-ahead on names, the buffer reset after ~500 ms of quiet; one character searches from the *next* row, a growing buffer from the current one |
+| Space | Taken and does nothing in a single-select tree — selection follows focus, and untaken it scrolls the scroller a page under the focus |
+
+Write it as a pure function — `(rows, focus, expanded, key) → { focus,
+expanded, action, handled }` — so the suite proves the map, and let the
+control only apply the answer. `handled` is what decides `preventDefault`.
+
+**It is written once, in the template:** `lib/tree-keys` (`keys.ts`,
+`typeAhead.ts`), adopted by making `<Control>/lib/tree-keys` and syncing. It
+works over the rows a control draws, reduced to `{ id, level, expanded, name }`
+(`expanded` `undefined` for a node that cannot open), and answers the new
+focus, **the ids to open and close** — so a reducer-driven React tree and a
+`Set` in a DOM control both apply it — an `activate` or `copy` action, and
+`handled`; `nextBuffer()` is the type-ahead's 500ms buffer as a pure
+function. The template's verifier tests it from source. `pcf-code-editor`
+(DOM, windowed) and `pcf-hierarchy-view` 0.3 (React, a tree and an org chart
+over the same rows) both run on it; the second's `tree/keyboard.ts` shows a
+control's own affordances put on keys the pattern already has — `*` under an
+ancestor showing one branch loads the rest of the family, → on a node whose
+children could not be read retries.
+
+**A press inside the widget must not take the focus.** A button inside a row
+with `tabIndex={-1}` is out of the Tab order but **still takes focus on
+mousedown** — and when it unmounts, as a *Show all* does once pressed, focus
+falls to the page and the arrows stop (`pcf-hierarchy-view`'s walkthrough on
+the form, 0.3.0). On the row's mousedown, `preventDefault()` and focus the
+widget with `{ preventScroll: true }`; the button's click still fires.
+
+**Draw the ring with `:focus-visible` on the widget**, on the active row —
+`.tree:focus-visible .row--active { outline … }` — not from a React focus
+state: a click focuses the widget without a ring, as Fluent's own tree does,
+and the ring follows the keys. A state set from `onFocus` also never sets in a
+page whose window has no focus, which is every automated screenshot.
+
+**`aria-activedescendant`, not a roving tab index, once rows are windowed.**
+The two ways to say which row has focus:
+
+- **Roving tab index** — the focused row has `tabindex="0"`, the rest `-1`,
+  and `.focus()` moves with the key. Right when every row is in the DOM.
+- **`aria-activedescendant`** — the scroller is the one focusable element and
+  names the focused row's `id`; rows are never focused. **Required when only
+  the rows in view are drawn**: focus on a row that scrolls out of the window
+  is focus on a removed node, and the browser drops it to `<body>`.
+
+Window as soon as the count can be large. The same probe drew rows off-screen
+on the form: 500 in 12–15 ms, 2,000 in 36–40 ms, **10,000 in 167–177 ms**, all
+43,206 of a 1 MB document in up to 901 ms. Fixed-height rows, absolutely
+placed on a track as tall as all of them, and a window of the ones in view
+plus a few either side — arithmetic, not measurement (`treeWindow.ts`). Size
+the window from the height the control *set*, not `clientHeight`: a form tab
+not yet shown reports 0.
+
+With `aria-activedescendant`, each drawn row carries what the browser can no
+longer work out from a nested DOM:
+
+- `role="treeitem"` (or `option` / `row`) and an `id` **unique per
+  instance** — two copies of the control on one form share the page, so prefix
+  the ids with a per-instance counter.
+- `aria-level`, `aria-setsize`, `aria-posinset` — a flat or windowed list
+  has no nesting to infer them from.
+- `aria-expanded` on rows that can open, and **only** on them: `false` on a
+  leaf announces a node that cannot open.
+- `aria-selected="true"` on the focused row where selection follows focus.
+- An `aria-label` when the visible text is punctuation — `{3}` reads as
+  "left brace three right brace"; *3 keys* does not.
+
+**A strip that echoes the focus is not a live region.** A status line under
+the widget that shows where focus is (a path, a description) must be
+`aria-hidden` if it sits in a `role="status"` — otherwise every arrow is
+announced twice, once by the tree and once by the strip. Announce events
+there (*Copied*), not position (*Live regions*, below).
+
+**Prove it with real keys.** `dev/dom.js` models no `keydown` and no bubbling,
+so the suite cannot show the listener is on the focused element, that the
+default was stopped, or that `aria-activedescendant` moved. `dev/keys.js`
+(the template's) presses keys through the DevTools protocol against the
+harness — `press(chrome, 'ArrowRight')`, `type(chrome, 'st')`,
+`focused(chrome)` for where focus is and what it points at. Code Editor's
+`dev/keys-walk.js` (`npm run keys`) is the worked example: it serves the
+harness, clicks Tree, walks every key, and asserts the row named, the strip,
+and what Enter selected in the editor. The desktop app's browser pane sends
+Shift+8 as `8` and its own `*` with an empty `key`, so press `*` through
+`keys.js`, not the pane.
+
+**Not yet heard.** Nobody has run Code Editor's tree under Narrator or NVDA;
+the markup above is the pattern's, not a measured reading. A control that
+ships one should say so in `SPEC.md` under *Not verified*.
+
+### Live regions: announce the change, not the value
+
+`aria-live="polite"` on anything that updates by itself is the reflex, and on a
+value that changes often it is the bug. A countdown wired that way is read to a
+screen-reader user once a second, which makes the rest of the form unusable.
+
+The distinction worth holding: **a live region should carry events, not state.**
+
+- **A value that ticks** belongs in `role="timer"` — a live region whose
+  implicit `aria-live` is `off`, so the element is identified as a timer and
+  nothing is announced as it counts.
+- **A transition between meaningful states** — on track → due soon → overdue,
+  saved → failed, 3 of 10 → 4 of 10 when the user asked for it — belongs in a
+  separate visually-hidden `aria-live="polite"` element, written *only* when the
+  state actually changes.
+- **Not on first render.** A control appearing on a form is not a change to
+  anything. Seed the "last announced" state silently and announce from the
+  second value onwards.
+
+Hide the polite region with the clip-rect idiom, not with `display: none` or
+`visibility: hidden` — both remove it from the accessibility tree along with the
+layout, which is the usual reason a live region is silent:
+
+```css
+.control-announcer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+```
+
+`pcf-sla-timer` is the worked example of the pair.

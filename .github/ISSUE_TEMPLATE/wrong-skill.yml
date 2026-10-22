@@ -1,0 +1,41 @@
+name: The wrong skill ran, or none did
+description: You asked for something and Claude read the wrong skill, or none of them.
+body:
+  - type: textarea
+    id: asked
+    attributes:
+      label: What you asked
+      description: Your message, as you typed it.
+    validations:
+      required: true
+  - type: dropdown
+    id: ran
+    attributes:
+      label: Which skill ran
+      options:
+        - None
+        - pcf-controls
+        - pcfhub-new-control
+        - pcfhub-publish
+        - pcf-review
+        - pcf-next-version
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: expected
+    attributes:
+      label: Which one you expected
+      options:
+        - pcf-controls
+        - pcfhub-new-control
+        - pcfhub-publish
+        - pcf-review
+        - pcf-next-version
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Plugin and Claude Code versions
+      description: The plugin's version from `/plugin`, and `claude --version`.

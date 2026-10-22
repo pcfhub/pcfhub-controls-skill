@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Register a control on PCFHub
+    url: https://github.com/pcfhub/_template/issues
+    about: Getting a repository onto the hub is an issue on pcfhub/_template, not here. https://pcfhub.dev/publish walks through it.
+  - name: Report a security problem
+    url: https://github.com/pcfhub/.github/blob/main/SECURITY.md
+    about: Privately, as the security policy describes — not in a public issue.

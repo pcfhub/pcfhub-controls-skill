@@ -1,0 +1,17 @@
+{
+  "name": "pcfhub-controls",
+  "version": "1.0.0",
+  "description": "Build, review, and ship Power Apps Component Framework (PCF) code components — five skills: the control itself, a new or adopted repository, publishing on PCFHub (pcfhub.dev), a review, and the next version of a shipped control.",
+  "author": {
+    "name": "Charles Llamas"
+  },
+  "homepage": "https://github.com/pcfhub/pcfhub-controls-skill",
+  "repository": "https://github.com/pcfhub/pcfhub-controls-skill",
+  "keywords": [
+    "pcf",
+    "power-platform",
+    "dataverse",
+    "power-apps",
+    "pcfhub"
+  ]
+}

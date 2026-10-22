@@ -1,0 +1,62 @@
+name: Release
+
+# A release is a version in plugin.json and an annotated tag on the commit that
+# set it. Plugin users take the marketplace's default branch, not the tag, so
+# what this adds is the record — the notes, and the five skill folders as one
+# zip for anyone installing without the plugin system. They go together because
+# each skill points into the others' references.
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - name: The tag is plugin.json's version
+        run: |
+          version=$(node -p "require('./.claude-plugin/plugin.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME, but plugin.json says $version. Bump plugin.json, commit, and tag that commit."
+            exit 1
+          fi
+
+      - name: Every pointer into a skill's references lands
+        run: node scripts/check-references.mjs
+
+      # The checkout may hold only the commit the tag points at; the
+      # annotation, which carries the notes, is a separate object.
+      - name: Read the release notes off the tag
+        id: notes
+        run: |
+          git fetch --quiet --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME" || true
+          if [ "$(git cat-file -t "refs/tags/$GITHUB_REF_NAME")" = "tag" ]; then
+            git tag -l --format='%(contents)' "$GITHUB_REF_NAME" > release-notes.md
+          fi
+          if [ -s release-notes.md ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::$GITHUB_REF_NAME carries no message, so the release gets GitHub's generated notes. Annotate it: git tag -a --cleanup=verbatim $GITHUB_REF_NAME -F notes.md"
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: The five skills, as one zip
+        run: |
+          mkdir -p artifacts
+          zip -qr "artifacts/pcfhub-controls-skills-$GITHUB_REF_NAME.zip" skills LICENSE
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v3
+        with:
+          body_path: ${{ steps.notes.outputs.has == 'true' && 'release-notes.md' || '' }}
+          generate_release_notes: ${{ steps.notes.outputs.has != 'true' }}
+          files: artifacts/*
