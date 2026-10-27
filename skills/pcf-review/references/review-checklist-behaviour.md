@@ -57,6 +57,13 @@ order; it sends you here between sections 5 and 7, and back.
       `<col>`, which a browser ignores and draws as equal shares; and the
       pinning is clamped against `allocatedWidth` so a phone-width host is not
       left with a sliver of moving table.
+- [ ] A sticky column on a **CSS grid** holds at both ends of the scroll, in
+      both directions: the grid has a `min-width` of its tracks' minimums (at
+      `width: 100%` the sticky cell stops at the grid's end), the offset is
+      `inset-inline-start` rather than `left`, and right to left drops a
+      `scrollbar-gutter: stable` on an `overflow-y: hidden` box — measured at
+      `scrollLeft` 0 and at its maximum, not looked at — *Pinning a column
+      while the rest scrolls* in `pcf-controls/references/layout.md`.
 - [ ] A control that lays content out in a **measured** width takes
       `Math.min(clientWidth, allocatedWidth)`, measures nothing where
       `allocatedWidth` is `-1` or `0`, and fills at least the width it laid out
@@ -68,6 +75,12 @@ order; it sends you here between sections 5 and 7, and back.
       it drew before the drag, and the slack goes to the column that is always
       last. Drag the third column narrower and confirm the first two did not
       widen — the handle should end under the pointer.
+- [ ] A drag the control takes is checked with real input that sends
+      `button: 'left'` on every move (`dev/cdp.js`'s `drag`), including a
+      target narrower than the distance moved; with `buttons` alone Chrome
+      drops pointer capture and only a target that stays under the pointer
+      still drags — *A drag over the protocol sends `button` on every move*
+      in `pcfhub-new-control/references/rig-maintenance-and-checks.md`.
 - [ ] A control that **writes** rolls back or surfaces the failure. An
       optimistic update with no `.catch()` leaves the UI asserting something
       about the record that is not true, and the user has no way to tell.

@@ -76,8 +76,15 @@ npm run bump -- --minor      # every version location, in one edit
 # reread docs/limitations.md for what this release closes
 npm run release -- --draft   # .release-notes.md, from the commits since the last tag
 # rewrite the notes, commit the bump and the limitations edit, then:
+git push origin main         # the branch first: the hub reads docs and pcfhub.json there
 npm run release -- --push
 ```
+
+**`--push` pushes the tag and nothing else.** The docs, `pcfhub.json`, the
+media it names and the demo fixture are read from the default branch, so a
+release whose commits are only on the tag reaches the hub with its notes and
+API reference and the last release's pages — *Push the branch before the tag*
+in `references/releasing.md`.
 
 **In PowerShell the `--` is swallowed and the flag never arrives**: quote it
 (`'--'`) or run the script directly — *Bump every version location* in

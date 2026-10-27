@@ -174,6 +174,31 @@ Shift+8 as `8` and its own `*` with an empty `key`, so press `*` through
 the markup above is the pattern's, not a measured reading. A control that
 ships one should say so in `SPEC.md` under *Not verified*.
 
+**Rows on a CSS grid: a `role="row"` wrapper with `display: contents`.** A
+layout that places every cell on one grid — a timeline's label, its day
+cells and its bar, each with an explicit `grid-row` — has no element per
+row, so a `role="grid"` around it holds cells and no rows. Wrap each row's
+cells in an element with `role="row"` and `display: contents`: the wrapper
+lays out as nothing, its children stay items of the one grid, and the
+tree has its rows. `pcf-calendar-view` 0.4.0 does this for the timeline,
+the header row of days included. Three rules came with it:
+
+- **`treegrid` only when the rows on screen are a tree.** `aria-level` is
+  not allowed on a `grid`'s rows, so a timeline whose rows nest by a Parent
+  is a `treegrid` with `aria-level` and `aria-expanded` on each row — and a
+  range with no parent in it stays a `grid` with no indent, so binding the
+  role changes nothing until there is a tree to show.
+- **A drawing says nothing a row does not.** Dependency arrows are an
+  `aria-hidden` SVG laid over the grid; each row's header carries the same
+  fact in words (*After ‹name›*, visually hidden where the arrow is drawn,
+  and on screen where it is not, or *Starts before ‹name› ends* in red).
+- **A move's consequence is an event.** A move that puts a task before its
+  predecessor's end is announced once in the polite region below (*‹task›
+  now starts before ‹name› ends*); the red on screen is state and is not.
+
+Not heard under a screen reader either: the structure was read back from the
+DOM on a model-driven form, not listened to.
+
 ### Live regions: announce the change, not the value
 
 `aria-live="polite"` on anything that updates by itself is the reflex, and on a

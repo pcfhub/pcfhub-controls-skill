@@ -620,6 +620,22 @@ Both were measured by sampling `scrollHeight` against `clientHeight` every
 that depends on the real Fluent; the harness stub renders inline, unpadded and
 untrapped, and would have certified either bug.
 
+**A small `Button` brings a 64px `min-width`, and which stylesheet wins
+differs by host.** `pcf-calendar-view` sized its ⋯ menu button
+(`.CalendarView-eventMenu { min-width: 20px }`) and its arrows (32px) one class
+deep. On a model-driven form the control's stylesheet landed last and both
+held — the ⋯ measured about 20px in a phone-width form. In PCFHub's demo
+Fluent's landed last: every ⋯ and every arrow was 64px, and on the hub's
+Phone device a 140px timeline label kept 19px for its title (measured
+2026-10-27 on pcfhub.dev and in the hub's harness; 0.4.1 moved the sizes under
+`.CalendarView .CalendarView-eventMenu`). So a size that holds on the form
+proves nothing about the hub, and the stub, which has no Fluent styles,
+proves nothing about either. **Every rule that sizes a Fluent component goes
+two classes deep** — the size alone, with one-class state rules such as an
+opacity reveal left where they are — and is read back with
+`getComputedStyle` in the hub's harness: `npm run demo-check -- --width 373`
+puts the real Fluent in a phone-width frame.
+
 ## Accessibility
 
 Moved to [accessibility.md](accessibility.md) on 15 Oct 2026, so each file can

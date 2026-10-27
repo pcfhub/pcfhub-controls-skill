@@ -25,6 +25,16 @@ cannot be forgotten:
 git tag -a --cleanup=verbatim v1.2.3 -F notes.md && git push origin v1.2.3
 ```
 
+**Push the branch before the tag.** `git push origin v1.2.3` — and
+`npm run release -- --push`, which runs it — sends the tag and the commits it
+needs, and leaves the default branch where it was. The hub reads two refs
+(the table under *Release and the hub contract* in `SKILL.md`): the tag gives it the notes and
+the manifest, and the default branch the docs, `pcfhub.json`, the media and
+the fixture. Tagged from commits the branch has not seen, a release lands with
+a new API reference beside the previous release's pages and demo. Push the
+branch, then the tag; the template's `scripts/release.mjs` refuses `--push`
+while the commit is ahead of its upstream (from 2026-10-27).
+
 **The tag message is the release notes, and the release notes are the
 component's changelog on the hub.** The shared workflow reads the annotated
 tag's message and publishes it as the release body; the hub imports that body

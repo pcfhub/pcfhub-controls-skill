@@ -129,6 +129,19 @@ API does it — until #35 it came back as `<column>: null`, which cost
 `pcf-hierarchy-view`'s demo the top of its tree.
 Make the label column the table's `primaryName`, or a search finds nothing.
 
+**A lookup role on the dataset reads from the same pair.** Bind the role to a
+`Lookup.Simple` column in the fixture's `columns`, keep each row's value as
+`_<column>_value` with the target's id, and declare a `oneToMany` whose
+`referencingAttribute` is that column: the record's `getValue` then answers the
+reference a form hands over, named from the target row's `primaryName`, and
+`getFormattedValue` the name. A lookup from a table **to itself** works the
+same way — `referencedEntity` and `referencingEntity` both the dataset's table
+— and the name comes from the target row even when the window or the page has
+not loaded it, as on a form (`pcf-calendar-view` 0.4.0's Parent and Depends on,
+checked in the hub's harness and on pcfhub.dev, 2026-10-27). An empty lookup
+reads as `''` here and `null` on a form, so treat both as unset. The template's
+stub preview hands values over as stored and does none of this.
+
 ## Refusing a write
 
 **It refuses a write when the fixture says so** (from 2026-09-28; this said

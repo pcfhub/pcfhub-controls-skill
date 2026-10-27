@@ -145,6 +145,17 @@ the control's own, like `shots.js` — `pcf-code-editor`'s `dev/keys-walk.js`
 (`npm run keys`) is the first; *A tree or a list of your own* in
 `pcf-controls/references/styling-and-accessibility.md` says what it has to assert.
 
+**A drag over the protocol sends `button` on every move.** Not only
+`buttons`: `Input.dispatchMouseEvent` with `type: 'mouseMoved'` and
+`buttons: 1` but no `button: 'left'` is a hover to Chrome: pointer capture
+taken on the press is dropped before the first move arrives. A target the
+pointer stays over still gets its moves, so a wide bar drags and the check
+passes; a narrow one the pointer outruns stops dead, and the check blames the
+control (measured 2026-10-27, `pcf-calendar-view`'s `dev/clicks.js` on a
+one-day bar 16px wide — the same drag on the 0.3.5 build stopped too).
+`dev/cdp.js` has `click(chrome, at)` and `drag(chrome, from, to)` from the
+same date, which send it; write presses through them rather than by hand.
+
 **The history search needs history.** A shallow clone holds one version of
 every file, so nothing is ever "stale" in it — only current or edited. Run
 the tool from a full clone of `_template` — and in CI, remember that

@@ -247,6 +247,36 @@ off, and `sizeColumns()` in `layout/widths.ts` (0.7.0) lays them out in pixels.
 *cells* is one missing class that looks like two bugs — and `dev/widths.js`
 asserts the pixels against widths measured in a browser.
 
+**On a CSS grid instead of a table, three more** — each found in
+`pcf-calendar-view`'s timeline (a sticky label column beside a month or a
+quarter of day tracks) by measuring the pinned cell at both ends of the
+scroll, and none visible in a static render (2026-10-27, Chrome, the preview
+and the hub's harness):
+
+- **A sticky cell cannot travel past the end of its own grid.** The grid was
+  `width: 100%` and its `minmax(36px, 1fr)` day tracks overflowed it into the
+  scroll; once scrolled further than the grid's width less the label, the
+  label column left with the days — a quarter's December lost every title
+  (scrolled 1,305px), and so did a 373px month's last week. Give the grid a
+  `min-width` of its tracks' minimums (`calc(<label> + <n> * <day>)`, inline,
+  since `n` is the component's): the tracks land where they did and only the
+  box under them grows. Not `min-width: max-content`, which sizes every `1fr`
+  track to the longest item it spans (*The timeline, and a drag with nothing
+  to drop on* in `dates-in-a-dataset.md`).
+- **Pin with `inset-inline-start`, never `left`.** A physical `left: 0` holds
+  nothing right to left: scrolled to the end, the label, the corner and an
+  hour grid's axis all left the box. The logical offset is the same rule in
+  both directions.
+- **Right to left, `scrollbar-gutter: stable` on a box with `overflow-y:
+  hidden` will not scroll back to its start.** `scrollLeft` stopped at minus
+  the gutter's width (−15) even when set to 0, and the label column sat 15px
+  past the box's edge, every title cut. Drop the gutter under `[dir='rtl']`;
+  left to right can keep it.
+
+Check a pinned column at `scrollLeft` 0 and at its maximum, in both
+directions — four positions, one script — and compare the pinned cell's edge
+with the box's inner edge, not with a screenshot.
+
 ### Resizing a column
 
 Two exemplars, one per shape: `pcf-row-commands` 0.2.3 (plain DOM, its

@@ -157,6 +157,18 @@ name }` with the GUID bare and lower-case, formatted as the name. A column
 outside the dataset: `getFormattedValue` answers `null` on a form, and in
 canvas a date answered as epoch milliseconds (`"1790708505000"`).
 
+**A `Lookup.Simple` role carries its target's name even when the target is
+not loaded** (measured 2026-10-27 on a model-driven subgrid, `pcf-calendar-view`
+probe 0.3.5, two lookups from a table to itself). Each role was found by alias
+with `order: -1` and no `isHidden`, though the subgrid's view selected neither
+column, and every row answered `getValue` with `{ etn, id: { guid }, name }`
+— GUID bare and lower-case — and `getFormattedValue` with the name, for rows
+whose target sat in January while the window held October. So a control can
+label a parent or a predecessor it never fetched: no second query for names.
+After a record-route move (`setValue`, `save()`) both lookups were still on
+the row at +0, +5 and +15 seconds, on a new dataset object. An unset lookup
+answers `null` to both.
+
 ### Working with the dataset
 
 ```ts

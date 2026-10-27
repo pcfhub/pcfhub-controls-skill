@@ -216,7 +216,10 @@ driven with `dispatchEvent`, which runs no hit-testing, capture retargeting
 or click synthesis. `pcf-calendar-view`'s `dev/clicks.js` presses with real
 input — `Input.dispatchMouseEvent` through the template's `dev/cdp.js`, in
 the hub's own harness — and failed on both builds before passing on the
-fixed one.
+fixed one. Its drags send `button: 'left'` on every move: without it Chrome
+drops the capture, and only a bar wide enough to stay under the pointer
+still drags (*A drag over the protocol sends `button` on every move* in
+`pcfhub-new-control/references/rig-maintenance-and-checks.md`).
 
 **A resize retires its override when both days agree.** A move of both
 columns could retire on the start day alone; a resize moves the end only,

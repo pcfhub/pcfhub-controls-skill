@@ -169,6 +169,11 @@ Wrong here means orphaned installs, not a rebuild.
       a file that was never added is the usual outcome of writing docs before
       taking screenshots. Files must also be small enough for the hub to mirror,
       and videos need posters.
+- [ ] The release's commits are on the default branch before its tag is
+      pushed. The tag gives the hub the notes and the API reference; the
+      docs, `pcfhub.json`, its media and the fixture come from the branch, so
+      a tag pushed alone publishes a new version beside the old pages — *Push
+      the branch before the tag* in `pcfhub-publish/references/releasing.md`.
 
 ## 4. Build health
 
@@ -343,6 +348,13 @@ customizers. Work through it here, in order, then continue with section 7.
   `aria-level`/`aria-setsize`/`aria-posinset`; the keys are pressed for real
   (`dev/keys.js`) — *A tree or a list of your own* in
   `pcf-controls/references/styling-and-accessibility.md`.
+- [ ] A grid laid out on one CSS grid has rows for a screen reader: each row's
+      cells sit in a `role="row"` wrapper with `display: contents`; a nesting
+      grid is a `treegrid` with `aria-level` only while the rows on screen
+      nest; and anything drawn over the grid (arrows, links) is `aria-hidden`
+      with the same fact written in the row's header — *Rows on a CSS grid: a
+      `role="row"` wrapper with `display: contents`* in
+      `pcf-controls/references/accessibility.md`.
 - [ ] Focus is managed when the control changes what is on screen.
 - [ ] Real semantics — `button`, `input`, `role`, `aria-label` — rather than
       clickable `div`s.
@@ -436,6 +448,13 @@ Cosmetic in the sense that nothing breaks, and the first thing a maker notices.
       inside a 32px field is ~28px, which is WCAG 2.1 AA (2.5.8) and not AAA
       (2.5.5); a `docs/` page still claiming 44px is the failure here, not the
       trade.
+- [ ] Every rule that **sizes a Fluent component** — a `Button`'s `min-width`, a
+      surface's `padding` — is two classes deep, and the size was read back
+      with `getComputedStyle` in the hub's harness at phone width. One class
+      ties with Fluent's own, the winner is load order, and the order is not
+      the same on a form and on the hub; the stub has no Fluent styles to
+      lose to — *A Fluent surface's own class competes with yours* in
+      `pcf-controls/references/styling-and-accessibility.md`.
 
 ## 8. Documentation honesty
 
