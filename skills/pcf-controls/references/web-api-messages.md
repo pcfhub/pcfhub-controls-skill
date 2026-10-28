@@ -283,7 +283,9 @@ each one POST. Learn says the API should allow asynchronous steps.
 - Turning the flow on writes one `callbackregistrations` row (`entityname`,
   `sdkmessagename`, `scope` 4, `version` 3); the designer's *(none)* table for
   an unbound action is `entityname` **`none`**. That row is how a probe checks
-  the subscription took before pressing anything.
+  the subscription took before pressing anything — with `softdeletestatus eq
+  0`, because saving the flow replaces its row and deleting the flow leaves the
+  old one behind soft-deleted.
 - The trigger body is `InputParameters` — each parameter by its name, a
   reference as `{Id, LogicalName, Name: null, KeyAttributes: [], RowVersion:
   null}` — plus, on a **bound** action, **`InputParameters.Target`**, the bound
