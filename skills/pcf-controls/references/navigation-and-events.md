@@ -556,6 +556,31 @@ there is no form and no script to bind it — gate a press-only button on
 the docs with channel 2; `pcf-row-commands` 0.3.0 raises the event and
 documents it as not delivered.
 
+**On a field control, channel 1 is delivered, measured 2026-10-28**
+(`pcf-form-action-button` 0.1.9 probe E1–E3, and the 0.2.x walkthrough from a
+real On Load web resource). `getControl("<column>").addEventHandler("onAction",
+fn)` — from the console's `Xrm.Page` and from an On Load library both — ran
+`fn` on every press with the payload whole: its data and **all three
+functions**, which then worked (`preventDefault()` kept the outputs where they
+were; `setBusy`/`setResult` drove the button). The subgrid's failure is the
+dataset host's, not the feature's.
+
+**And channel 2 is read off the control, by long keys** — the same probe:
+
+- In an `addOnOutputChange(fn)` handler, `executionContext.getEventSource()` is
+  the **column** (it has `getValue`), not the control — it has no `getOutputs`.
+  Read `formContext.getControl("<column>").getOutputs()`.
+- **Each output is keyed `"<column>.fieldControl.<output>"`**, holding
+  `{ type, value }` — `outputs.pressCount` is `undefined`. A subgrid's are
+  `"<subgrid>.<output>"` (above). Print `Object.keys(getOutputs())` once
+  before documenting a read.
+- **Two `notifyOutputChanged()` calls ~0.3 s apart arrived as one
+  `OnOutputChange`** carrying the final values; two presses seconds apart were
+  two. A script reads the outputs it is given, never a count of events.
+
+`pcf-form-action-button`'s 0.1.0 docs had channel 2's snippet wrong on both
+counts for seven weeks; a snippet nobody pasted into a form is a claim.
+
 **The cost is a maker who wires both getting the action twice**, and that has to
 be stated in `docs/`. It is a real hazard and it is still the right trade.
 

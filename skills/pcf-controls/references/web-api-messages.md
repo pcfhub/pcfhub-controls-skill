@@ -265,6 +265,18 @@ prefix. `DELETE customapis(<id>)` removes the parameters and properties with
 it. A probe that needs an action creates its own and deletes it — never one
 somebody else's flow depends on.
 
+**A bound Custom API cannot take a parameter named `Target`** — 400
+`0x80048d0b` *Custom API bound to an entity cannot use the reserved name
+'Target' as the name of a Custom API Request Parameter* (2026-10-28). The bound
+record already is its `Target`; name the others anything else, and tell makers
+so, because "Target" is what they reach for.
+
+**For a flow to hear it**, Power Automate's *When an action is performed* lists
+only actions in a **catalog**: a `catalogs` row, a second one under it as the
+category (`ParentCatalogId@odata.bind`), and a `catalogassignments` row linking
+the category to the API (`CatalogId@odata.bind`, `CustomAPIId@odata.bind`) —
+each one POST. Learn says the API should allow asynchronous steps.
+
 ### From a row: what a command on a dataset control adds
 
 `pcf-row-commands`' 0.3.4 probe asked the rest from a **dataset** control on a
@@ -306,8 +318,43 @@ throwaway no-plug-in Custom APIs:
 - **Five calls in sequence: 79–235 ms each, 734 ms in all, nothing
   throttled**, and the platform kept the selection through the refresh.
 
+### From a form: a button on the record
+
+`pcf-form-action-button` 0.1.9's probe asked the same from a **field** control
+on the account form (2026-10-28, its SPEC.md P1–P8, then the 0.2.x
+walkthrough), with two throwaway no-plug-in Custom APIs, *Allowed custom
+processing step type* Async only:
+
+- **The record is `mode.contextInfo`** — `entityTypeName` and the bare
+  lower-case `entityId` on a saved record; on a new one `entityId` is
+  **`null`**, present. **After the first save the same instance gets the id**,
+  on a later `updateView`, with no `destroy` and no second `init` — so a button
+  that needs the record can say *Save the record first* and come on by itself.
+- **`getEntityMetadata(table)` works from a field control** — `EntitySetName`,
+  `PrimaryIdAttribute` in 0–1 ms (the form has it cached) — and
+  `page.getClientUrl()` answers. Both are the same as from a dataset control.
+- **A bound call answered 204 in 411 ms, unbound 206 ms**; a real platform
+  message with a response (`InitializeFileBlocksDownload`, unbound, `Target`
+  `{record}`) answered 200 with `FileName`. The cookie is the only credential,
+  as everywhere else.
+- **The call sees the saved record.** Nothing the user typed and did not save
+  is part of it. A control cannot save the form, so say so, and let a form
+  script stop the press while the form is dirty.
+- **After a write behind the action, the form is stale.** From an
+  `addOnOutputChange` handler, `formContext.data.refresh(false)` showed a
+  server-side write in 251 ms, the form clean and the control **not** remounted.
+  A control cannot call it; document it as the maker's snippet, keyed on an
+  output that says the call succeeded.
+
+`_template`'s **`lib/web-api-action`** is all of this as shared code —
+`callAction`, the refusal reading, `loadRecordKeys` (metadata, then
+`EntityDefinitions`), `organisationUrl` — adopted by making the folder; both
+`pcf-row-commands` (0.4.3) and `pcf-form-action-button` (0.2.0) use it.
+
 **The rig.** Both rigs answer an action from `fixture.actions` — the field rig
-since 2026-10-15, the dataset rig since 2026-10-16 — `{ <name>: { boundTo?,
+since 2026-10-15, the dataset rig since 2026-10-16; an older field rig takes the
+stub by copying `actionAnswer` and its three reply helpers verbatim, as
+`pcf-form-action-button`'s `dev/host.js` did — `{ <name>: { boundTo?,
 parameters: { <name>: { type, optional? } }, response: [...], answer(params,
 id), refuse(params, id)? } }`, with every refusal above in the server's order
 (the two 404 spellings, the `Edm.Guid` and untyped-reference 400s, 204 for no

@@ -9,6 +9,7 @@ read whole.
 
 - [Accessibility](#accessibility)
   - [A model-driven form keeps Tab](#a-model-driven-form-keeps-tab)
+  - [A button that is working keeps focus](#a-button-that-is-working-keeps-focus)
   - [A tree or a list of your own: one tab stop, arrows inside](#a-tree-or-a-list-of-your-own-one-tab-stop-arrows-inside)
   - [Live regions: announce the change, not the value](#live-regions-announce-the-change-not-the-value)
 
@@ -56,6 +57,40 @@ form:
 
 That is also the accessible default: Tab moving between fields is what a
 keyboard user of a form expects.
+
+### A button that is working keeps focus
+
+**Do not set `disabled` on the button the user just pressed while its work
+runs.** A focused element that becomes `disabled` is blurred — focus goes to
+`BODY` — and enabling it again gives nothing back, so a keyboard user who
+pressed Enter starts again from the top of the page. Measured on the account
+form with `pcf-form-action-button` 0.2.0 (2026-10-28, its SPEC.md W8): Enter on
+the focused button, the action's call, and `document.activeElement` was `BODY`
+from then on. 0.1.0 had shipped the same fault in its `setBusy()` and while
+its confirmation dialog was open, and no assertion could see it — the suite's
+DOM does not blur, and nobody had pressed it with a keyboard on a form.
+
+While it works — a call in flight, a dialog open, a handler busy — mark the
+button `aria-disabled="true"`, keep it focusable, and refuse the press in the
+click handler by state, which a single-flight control already does:
+
+```ts
+const working = this.phase === 'asking' || this.phase === 'busy';
+
+this.button.disabled = !this.hostInteractive;      // cannot be used at all: disabled proper
+if (working && this.hostInteractive) {
+    this.button.setAttribute('aria-disabled', 'true');
+} else {
+    this.button.removeAttribute('aria-disabled');
+}
+```
+
+Style the busy look from a class, not from `:disabled`, so it does not depend on
+which of the two the state uses. Keep `disabled` proper for a button that cannot
+be used at all — a read-only form, a missing privilege, a configuration that
+cannot run: there is no press in flight to come back to. And the platform's own
+dialog then hands focus back on close — measured on the same form, Enter on the
+dialog's button returned focus to the control's.
 
 ### A tree or a list of your own: one tab stop, arrows inside
 

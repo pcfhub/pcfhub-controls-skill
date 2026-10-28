@@ -49,7 +49,7 @@ that move a reading are rarely the ones expected to:
 | Source | What it answers | How to read it |
 | --- | --- | --- |
 | GitHub topics `powerappscomponentframework`, `pcf-controls`, `pcf` (each `?o=desc&s=stars`; filter Cloud Foundry out of the last) | which *kinds* of control the community stars | A floor, not a signal of change: the top of the list — editable grid, upload, calendar, timeline — barely moves, so a quick look is enough and only a *change* is worth reporting |
-| The PCF Gallery request board **ranked by votes** — `pcfgallery.userecho.com/communities/1-general/topics?order=top&type=0&status=0&tag=all` (WebFetch is refused there; read it in a browser) | what people asked for by name, with votes | **Not the front page**: that lists *recently updated* topics, and read alone it once hid the board's two most-voted requests (30 and 28 votes) while showing a 9-vote one |
+| The PCF Gallery request board **ranked by votes** — `pcfgallery.userecho.com/communities/1-general/topics?order=top&type=0&status=0&tag=all` (WebFetch is refused there; read it in a browser) | what people asked for by name, with votes | **Not the front page**: that lists *recently updated* topics, and read alone it once hid the board's two most-voted requests (30 and 28 votes) while showing a 9-vote one. **And not page 1 alone**: read page 2 by clicking the pager's **2** — `?page=2` in the address is ignored and lands on page 1 again. Page 2 went unread for twenty-seven runs while it held a 7-vote request (a button that runs a flow) that a second board also carried, and that became a release |
 | Microsoft's *Important changes (deprecations) coming*, on Learn — **and its canvas page**, `learn.microsoft.com/power-apps/maker/canvas-apps/important-changes-deprecations`, which the main page only links to | what the platform is **taking away** — and, for a probe, what it is taking away from *you*: see [the environment has to outlive the probe](#measure-before-you-write-with-a-probe-build) | **Read the whole page, not only what is new since you last looked.** The platform's Input Mask, deprecated in January 2023, sat far down it and became `pcf-input-mask`; the hierarchy control removed in October 2025 became `pcf-hierarchy-view` |
 | Hub downloads — `list_components` with `sort: "popular"` | which shipped controls people actually install | **Report the movement, not only the order**, and over a week as well as a day — a day is too short to read, and on a quiet one every control moved by 0. The tool has no memory, so keep each reading, dated, for the next one to compare against. The version it lists is **the hub's**, not the repository's: compare it with the tag before calling a release unpublished |
 | The control's own `docs/limitations.md` | the gaps already written down as refusals | Nearly every *improve* comes from here |
@@ -60,7 +60,12 @@ that move a reading are rarely the ones expected to:
 PCF Gallery's own listing is for breadth — it has no popularity order — and a
 gap three competing controls already fill is a smaller release than it looks.
 A pick is strongest where two sources agree: Row Commands 0.2.0 was the #2
-download *and* named both of its gaps on its own limitations page.
+download *and* named both of its gaps on its own limitations page. Form Action
+Button 0.2.0 had three: the same request on two vote boards (a button that
+runs a flow — 7 on PCF Gallery's page 2, 3 on Resco's), the control among the
+week's download movers, and *It does not talk to Dataverse* on its own
+limitations page. Read the boards against each other, not one at a time — a
+request that is mid-table on each can be the only one both carry.
 
 **Before any of it, rule out the platform.** Read Microsoft
 Learn's *List of controls available for model-driven apps* and the form
