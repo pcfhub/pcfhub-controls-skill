@@ -277,6 +277,37 @@ category (`ParentCatalogId@odata.bind`), and a `catalogassignments` row linking
 the category to the API (`CatalogId@odata.bind`, `CustomAPIId@odata.bind`) —
 each one POST. Learn says the API should allow asynchronous steps.
 
+**What the flow then gets** — measured from a form button,
+`pcf-form-action-button` W1, 2026-10-28:
+
+- Turning the flow on writes one `callbackregistrations` row (`entityname`,
+  `sdkmessagename`, `scope` 4, `version` 3); the designer's *(none)* table for
+  an unbound action is `entityname` **`none`**. That row is how a probe checks
+  the subscription took before pressing anything.
+- The trigger body is `InputParameters` — each parameter by its name, a
+  reference as `{Id, LogicalName, Name: null, KeyAttributes: [], RowVersion:
+  null}` — plus, on a **bound** action, **`InputParameters.Target`**, the bound
+  record (the platform's own use of the reserved name), and `ItemInternalId`,
+  its id. Then `OutputParameters` (`{}` with no response properties),
+  `SdkMessage`, and `RunAsSystemUserId`, the caller. Unbound has no `Target`
+  and no `ItemInternalId`.
+- In expressions: `triggerBody()?['InputParameters']?['<Name>']`, or
+  `triggerOutputs()?['body/InputParameters/<Name>']` — both read back right.
+- **The call does not wait for the flow.** 204 in 0.3–0.6 s; the run started
+  0.4–5.1 s after the answer, on the server's clock. A control that calls such
+  an action can say only that it was sent; a form refresh on its answer shows a
+  plug-in's writes, never the flow's.
+- A flow can be made without the portal: `POST
+  https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/<env>/flows?api-version=2016-11-01`
+  with a token for `https://service.flow.microsoft.com/`, the trigger
+  `OpenApiConnectionWebhook` / `BusinessEventsTrigger` with parameters
+  `catalog`, `category`, `subscriptionRequest/entityname`,
+  `subscriptionRequest/sdkmessagename`, and an existing Dataverse connection
+  (listed from `api.powerapps.com`, `apis/shared_commondataserviceforapps/connections`)
+  in `connectionReferences`. Runs and their trigger outputs are `GET
+  …/flows/<id>/runs`. This is how a probe measures a flow when the portal will
+  not load in an automated browser.
+
 ### From a row: what a command on a dataset control adds
 
 `pcf-row-commands`' 0.3.4 probe asked the rest from a **dataset** control on a
