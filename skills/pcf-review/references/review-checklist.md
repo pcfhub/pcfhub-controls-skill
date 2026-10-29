@@ -356,6 +356,17 @@ customizers. Work through it here, in order, then continue with section 7.
       `role="row"` wrapper with `display: contents`* in
       `pcf-controls/references/accessibility.md`.
 - [ ] Focus is managed when the control changes what is on screen.
+- [ ] A pressed control is never `disabled` while its own work runs: it is
+      `aria-disabled` (Fluent: `disabledFocusable`; a text box `readOnly`)
+      with the press refused by state. Chrome blurs a focused element that
+      becomes disabled at the next frame and gives nothing back when it is
+      enabled again (measured in Chrome 152, 2026-10-29). A control removed by
+      its own action — a chip's remove, a row's delete — hands focus to a
+      neighbour. `grep -n "disabled={\(busy\|loading\|adding\|working\)"` finds
+      the first kind (`check-template` warns on it). A rig answers
+      inside one frame and hides the second, so slow its writes before you
+      press: *A button that is working keeps focus* in
+      `pcf-controls/references/accessibility.md`.
 - [ ] Real semantics — `button`, `input`, `role`, `aria-label` — rather than
       clickable `div`s.
 - [ ] Colours come from the host theme rather than being hard-coded, so the

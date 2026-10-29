@@ -92,6 +92,37 @@ cannot run: there is no press in flight to come back to. And the platform's own
 dialog then hands focus back on close — measured on the same form, Enter on the
 dialog's button returned focus to the control's.
 
+**When the blur happens, and why a rig hides it.** Measured in Chrome 152
+(2026-10-29): straight after `button.disabled = true` the button is still
+`document.activeElement`. Two animation frames later it is not, and setting
+`disabled = false` gives nothing back. So a write that settles inside one
+frame never shows the bug, and every rig answers that fast. `pcf-tag-list`'s
+harness kept focus on a disabled add box until its writes were slowed to
+400 ms; then focus went to `BODY`, as it does on a form. Slow the rig's writes
+before you press, as `pcf-tag-list`'s `dev/focus.js` does: wrap `fetch` and
+the context's `webAPI`.
+
+**In React:**
+- **A Fluent `Button`** takes `disabledFocusable`, which renders
+  `aria-disabled="true"` and swallows the click.
+- **A plain `<button>`** takes `aria-disabled={busy || undefined}`, and its
+  handler returns early.
+- **A text box that starts the work on Enter** is `readOnly` (with
+  `aria-busy`), not `disabled`. `pcf-tag-list` 0.5.4's add box is the example.
+- **Draw the busy look from `[aria-disabled="true"]` as well as `:disabled`.**
+- **A suite's Fluent stand-in that copies props onto a `<div>` must turn
+  `disabledFocusable` into `aria-disabled` itself.** React drops an unknown
+  boolean attribute, so as passed, nothing renders and no assertion can see
+  it (`pcf-audit-history` 0.2.1).
+
+**A control that leaves with its own action takes focus with it**, a chip's
+remove or a row's delete, and the browser puts focus on `BODY`. Decide the
+neighbour when it is pressed (the next item, else the previous one, else the
+add box), and once it is gone, focus that neighbour, but only if
+`document.activeElement` really is `BODY`. A user who clicked elsewhere in the
+meantime keeps their place. `pcf-tag-list` 0.5.4: measured `body` before,
+"Remove Bug" after.
+
 ### A tree or a list of your own: one tab stop, arrows inside
 
 A control that draws many choosable things of its own — a tree, a list of
