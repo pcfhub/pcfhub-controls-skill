@@ -128,7 +128,13 @@ Measured with `pcf-hierarchy-view`'s 0.2.9 probe (2026-10-15): a
 `TwoOptions` input with `default-value="false"` and an `Enum` with
 `default-value="tree"`, both left blank in a binding, arrived as **`raw:
 null`** — the generated type says `boolean` and the string union, and neither
-default reached the control. So read `null` as the default yourself, and read
+default reached the control. **A property added in a later version arrives
+the same way on a control that was already placed**: there is no entry for it
+in the form XML at all. `pcf-date-range-picker`'s 0.3.9 probe (2026-10-29)
+read its new `fiscalYearStart` Enum (`default-value="org"`) as `raw: null`,
+and the new Whole inputs as `raw: null, type: null`, while a `-30` written
+into the form XML arrived as the number `-30`, `type: 'Whole.None'`. So an
+upgrade never applies a new property's default for you. So read `null` as the default yourself, and read
 a `TwoOptions` through a normaliser that also turns the hub harness's string
 `"false"` into off: `raw === true || raw === 'true' || raw === 1 || raw ===
 '1'`.

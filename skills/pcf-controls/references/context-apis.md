@@ -8,6 +8,7 @@ rejections and privileges.
   - [Linking records over a many-to-many](#linking-records-over-a-many-to-many)
   - [Reading configuration from a web resource](#reading-configuration-from-a-web-resource)
   - [Calling a Web API function `context.webAPI` cannot](#calling-a-web-api-function-contextwebapi-cannot)
+  - [Reading the organisation's settings](#reading-the-organisations-settings)
   - [Restoring an audited value — writing back what a function read](#restoring-an-audited-value--writing-back-what-a-function-read)
   - [The current record's identity, from a field control](#the-current-records-identity-from-a-field-control)
   - [Escaping a `$filter`, in the right order](#escaping-a-filter-in-the-right-order)
@@ -233,6 +234,33 @@ Moved to [web-api-messages.md](web-api-messages.md) on 15 Oct 2026, so each
 file can be read whole:
 
 - **Calling a Web API function `context.webAPI` cannot**
+
+### Reading the organisation's settings
+
+`retrieveMultipleRecords('organization', '?$select=…')` answers one row
+through `context.webAPI` with formatted-value annotations, as any table does.
+It is how a control learns the organisation's own choices: fiscal year
+(`fiscalcalendarstart`, `fiscalperiodtype`), auditing (`isauditenabled`),
+blocked file extensions (`blockedattachments`).
+
+Measured from a field control on a form, 2026-10-29
+(`pcf-date-range-picker` 0.3.9):
+
+```
+fiscalcalendarstart                    "2022-04-01T10:59:00Z"   UserLocal behind a Date Only format — an instant
+fiscalcalendarstart@…FormattedValue    "4/1/2022"
+fiscalperiodtype                       2002                     quarters
+fiscalyeardisplaycode                  1
+```
+
+**Read as a System Administrator.** A basic role normally carries Read on
+the organisation, which is unmeasured here. Treat a refusal as the
+organisation's default (January for the fiscal year) rather than as an
+error. Read once per control and hold the promise on the instance. A date
+column here needs the same conversion as any UserLocal value: see *Today, and
+ranges counted from it* in [dates.md](dates.md). The template's field rig
+answers the row in this shape (`fiscalStart`, `blockedAttachments`,
+`auditEnabled.org`).
 
 ### Reading the table definitions
 

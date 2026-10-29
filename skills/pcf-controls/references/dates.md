@@ -13,6 +13,7 @@ date control needs.
   - [The shift is in serialising, not reading](#the-shift-is-in-serialising-not-reading)
   - [Subtracting timestamps is an hour out across DST](#subtracting-timestamps-is-an-hour-out-across-dst)
   - [Formatting](#formatting)
+  - [Today, and ranges counted from it](#today-and-ranges-counted-from-it)
   - [A date read through a dataset](#a-date-read-through-a-dataset)
 
 ## Dates, and the day that moves
@@ -373,6 +374,60 @@ disagreement. What it can hold is the half the control owns — let `dev/host.js
 record what its formatters were handed, and assert every one is at midday.
 `pcf-date-range-picker` does this with a `formatCalls` array on the fixture:
 67 calls in a default render, none at midnight.
+
+### Today, and ranges counted from it
+
+Quick ranges ("last 90 days", "this fiscal quarter") and bounds that move with
+the date ("nothing before 30 days ago") all start from one *today*. Get that,
+and the ends, right once, in a pure module the suite can hand any day to.
+`pcf-date-range-picker` 0.4.1's `calendar.ts` and `range.ts` are the worked
+example.
+
+- **One today per render, handed down.** Read `new Date()` once in
+  `updateView` and pass it to the presets, the bounds and the calendar's
+  highlight, so the three cannot disagree across midnight. It is the
+  **browser's** day. The Dataverse user's zone can be on another date for a
+  few hours, and nothing in the platform hands a control the user's today.
+  Say so in the limitations instead of half-converting.
+- **Both ends inclusive, and build days from local components.** "Last 7
+  days" is today and the six before it. Use `new Date(y, m, d + n)` for
+  arithmetic and the day-number difference (*Subtracting timestamps is an
+  hour out across DST*) for comparisons. A month step clamps to the target
+  month's last day, or 31 January plus a month is 3 March.
+- **Quarters and fiscal years are one function with a first month.** The
+  quarter containing `day`, with quarters starting in `first` (0–11), begins
+  at `day.getMonth() - ((day.getMonth() - first + 12) % 12) % 3`. The fiscal
+  year begins in `first` of this year if `day.getMonth() >= first`, else of
+  last year. Calendar quarters are `first = 0`. Test both sides of the year
+  boundary and a leap February.
+- **The organisation's fiscal start is an instant, not a day.**
+  `organization.fiscalcalendarstart` is **UserLocal behind a Date Only
+  format**. That is the shape *Format and Behavior are different fields* warns
+  about. Read on a real organisation (2026-10-29): set to 1 April, it held
+  `"2022-04-01T10:59:00Z"` (formatted `"4/1/2022"`), and the original
+  1 January held the same 10:59Z. Take the month from that instant moved into
+  the user's zone (`getTimeZoneOffsetMinutes(that date)`, the platform's
+  sign), never from its UTC or browser components. 10:59Z is already the next
+  day east of UTC+13, and a start entered near midnight is the previous day
+  in UTC. `fiscalperiodtype` 2002 is quarters. A control that needs other
+  period shapes (4-4-5, four-week) has to read more than the start month.
+- **Read it once, and only when a fiscal range is shown.** Read it once per
+  control, held on the instance: nothing promises the same `webAPI` object
+  on every `updateView`, and the rig does not give one. A rail without a
+  fiscal range should cost no request. A failed or missing read falls back
+  to January, the platform's own default, never to a broken rail.
+- **Month names arrive with 13 entries.** `dateFormattingInfo.monthNames`,
+  `abbreviatedMonthNames` and both genitive arrays are .NET's: twelve names
+  and an empty string (measured 2026-10-29). Take the first twelve, and fall
+  back unless all twelve are non-empty. A fixture with exactly twelve hides
+  an off-by-one; give the rig the thirteen.
+- **A control that reuses buttons across a re-render must not `disable` the
+  focused one.** A month grid redrawn for the next year keeps the same twelve
+  buttons, so the one holding focus can turn out of bounds under it. It was
+  blurred to `BODY` on the form (`pcf-date-range-picker` 0.4.0, Page Down
+  onto September 2027 under a 90-day bound). Make an out-of-range cell
+  `aria-disabled` and refuse its press: *A button that is working keeps
+  focus* in [accessibility.md](accessibility.md).
 
 ### A date read through a dataset
 
