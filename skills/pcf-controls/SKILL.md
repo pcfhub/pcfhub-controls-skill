@@ -50,7 +50,7 @@ of what you would otherwise ask the user for.
 | `references/hosts.md` | canvas vs model-driven vs Power Pages, updating a control a canvas app already has, full screen |
 | `references/dataset.md` | reading a view: roles, the subgrid's chrome, paging, sorting, selection |
 | `references/dataset-filtering.md` | filtering the view a dataset control is bound to |
-| `references/dataset-writing.md` | writing a record from a dataset control — a Status Reason, a lookup, two routes |
+| `references/dataset-writing.md` | writing a record from a dataset control — a Status Reason, a lookup, two routes, re-reading in place, rows in your own order |
 | `references/layout.md` | fitting a table to its host, or laying anything out in a width you measured, narrow included |
 | `references/dates.md` | binding or reading any date column on a field |
 | `references/dates-in-a-dataset.md` | a date read through a view, a timeline, a date control's demo presets |

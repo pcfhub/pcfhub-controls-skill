@@ -16,7 +16,7 @@ to the file that holds it: find the title here, then read that file.
 Split out of `manifest.md` on 2 Oct 2026.
 
 - **Property types** — The wrong `of-type` does not fail — it empties the column picker · A `TwoOptions` input cannot default to on · `of-type-group` costs more than it looks · An output that reports a verdict
-- **The bound property is more than `raw`** — A bound number column · Three more things `context` gives you for free
+- **The bound property is more than `raw`** — A bound number column · A Duration column · A rollup column · Three more things `context` gives you for free
 
 ## [rendering-and-hosts.md](rendering-and-hosts.md) — Standard and React controls, teardown, and text a user wrote
 
@@ -62,7 +62,7 @@ Split out of `dataset.md` on 15 Oct 2026.
 
 Split out of `dataset-writing-and-layout.md` on 10 Oct 2026.
 
-- **Writing from a dataset control** — The dataset record can write, and the typings do not say so · Two routes, chosen per record · Writing a Status Reason · Writing through the Web API instead · Writing a lookup through the Web API
+- **Writing from a dataset control** — The dataset record can write, and the typings do not say so · Two routes, chosen per record · Writing a Status Reason · Writing through the Web API instead · Writing a lookup through the Web API · A second column beside the lane, and Owner · Rows in your own order
 
 ## [layout.md](layout.md) — Fitting the host, and narrow widths
 

@@ -102,6 +102,23 @@ order; it sends you here between sections 5 and 7, and back.
       (`2147779592`, measured 2026-09-29). The state is on the descriptor
       option; a `statecode` write sends the state's `DefaultStatus`
       (`pcf-kanban-board` 0.4.0, *Writing a Status Reason*).
+- [ ] A dataset control that writes and re-reads past page 1 uses
+      `loadExactPage(page)`, not `refresh()`, which lands on page 1 while the
+      control's own count says 2 — and undoes a refused `save()` by writing
+      the old value back, because the refused value stays on the record
+      through a refresh (`pcf-data-table` 0.9.0, R5 and R6; *Writing from a
+      dataset control* in `pcf-controls/references/dataset-writing.md`).
+- [ ] A control that lets rows be put in an order of its own holds the moved
+      order on screen until the re-read agrees — each save repaints with its
+      new value and nothing is re-sorted until then — writes only inside the
+      page's range, refuses a page holding a row with no value (it sorts
+      first), offers the move from the keyboard on a real button with each
+      step announced, and hides its handles under any other sort, filter or
+      grouping with one way back. *Rows in your own order* in
+      `pcf-controls/references/dataset-writing.md`; `_template`'s `lib/rank-order` is the arithmetic.
+- [ ] A field control on a **rollup** column honours `disabled`: the form
+      takes a write and marks it dirty, and the server answers 204 and keeps
+      its own value. *A rollup column* in `pcf-controls/references/properties.md`.
 - [ ] Anything compared with a Choice read off a record goes through one
       normaliser: `getValue()` is the string `"3"` on a form, and `===`
       against a number never matches (`pcf-kanban-board` through 0.3.5).

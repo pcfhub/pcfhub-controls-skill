@@ -12,6 +12,7 @@ is in `layout.md`.
   - [Writing through the Web API instead](#writing-through-the-web-api-instead)
   - [Writing a lookup through the Web API](#writing-a-lookup-through-the-web-api)
   - [A second column beside the lane, and Owner](#a-second-column-beside-the-lane-and-owner)
+  - [Rows in your own order](#rows-in-your-own-order)
 
 ## Writing from a dataset control
 
@@ -141,6 +142,22 @@ Four traps, all measured:
   until the next platform-driven fetch and then appears to lose it. A control
   that accumulates pages with `loadNextPage()` is the exception: a refresh
   drops every page but the first — see *Writing through the Web API instead*.
+  **Past page 1, re-read with `loadExactPage(page)`, not `refresh()`.**
+  Measured on a subgrid by `pcf-data-table` 0.9.0 (its SPEC.md, R6):
+  `refresh()` from page 2 lands on page 1 — `firstPageNumber` 2 → 1, with or
+  without a write — while a control's own page count still says 2;
+  `loadExactPage(2)` re-reads page 2 with the new values, in the new order.
+  The same release fixed its inline editing for it.
+- **A refused value stays on the record.** Measured by the same probe (R5): a
+  whole number over 2,147,483,647 was refused in 130 ms with a `UciError` whose
+  `message` is an OData stack trace (`displayMessage` `null`; the innermost
+  sentence after `InnerException` is the readable part) — and the record went
+  on reading the refused value, **through a `refresh()` too**, while the
+  server held the old one. Writing the old value back with `setValue` +
+  `save`, then re-reading, put the row right. So a rollback that only
+  re-reads, or only resets the control's own override, leaves the refused
+  value to reappear on the next pass. A fraction written to a whole number is
+  accepted and rounded (1.5 → 2).
 - **The per-column methods are `async`.** `isEditable`, `isSecured`, `isReadable`
   and `getFieldRequiredLevel` return Promises; `isValid` and
   `getCurrencyDecimalPrecision` return values. Nothing distinguishes them by
@@ -154,7 +171,8 @@ Four traps, all measured:
   the message names neither the column nor the record. Use the logical name —
   `column.name`, not `alias`, not the display name.
 - **`isDirty()` returned `false` immediately after a resolved `setValue`.**
-  Unexplained as of this writing; the write still committed. Do not gate a
+  Unexplained as of this writing; the write still committed. It also said
+  `false` while a refused value sat on the record (above). Do not gate a
   commit on `isDirty()` until somebody has established what it actually tracks.
 
 Because these are async, resolving editability is a **fetch**, not a read: it
@@ -551,3 +569,71 @@ shows the staged value at once, a **text** column writes through `save()` —
 but a **choice stages `null`** in every shape tried (number, string,
 `{ Value }`, label), and the save bumps `modifiedon` and writes nothing for
 it. A control whose writes are choices or lookups is read-only in canvas.
+
+### Rows in your own order
+
+Letting people put rows in a sequence of their own — a plan's steps, an
+account's priorities — and keeping it for everyone. `pcf-data-table` 0.9.0
+does it; its SPEC.md has the probe (R1–R6) and `_template`'s
+`variants/lib/rank-order` the arithmetic. What it rests on, measured on a
+model-driven subgrid:
+
+- **The order lives in a whole-number column the maker names**, and the
+  table sorts by it, ascending, alone. **A row with no value sorts first**
+  ascending and last descending (R1), so one unnumbered row breaks the order
+  above every numbered one. **A sort the control applied is forgotten on
+  reload** — the first pass arrives with the view's sort — so apply it in
+  `init` every time; the rows are already in the dataset there, so the sort
+  rides the platform's own first fetch.
+- **The column can be left out of the view.** Outside it, `getValue` answers
+  `null` whatever the row holds (R2). `dataset.addColumn(name)` exists on
+  model-driven and brings the value in on the next fetch — and adds the
+  column to `dataset.columns` with `order: -1` and `isHidden: false`, where a
+  control drawing every column draws it. Look the name up first (a
+  same-origin `EntityDefinitions(...)/Attributes(LogicalName=...)`, `AttributeType`
+  `Integer`): a link to a column that does not exist cleared every row
+  (`pcf-data-table` 0.8.0, P11), and nobody has tried `addColumn` with one.
+- **A move reuses the values the rows it passes already hold**, handed out in
+  the new order: 10, 20, 30 stay 10, 20, 30, and only the rows in the span are
+  written. Where that would leave a tie the new order relies on, number a
+  window of the new order with consecutive values, growing it until it fits
+  between its neighbours — **inside the range the page already spans**, except
+  at the open ends of the list, so a move on page 2 never lands among page 3's
+  rows. A middle page whose values are all taken (5, 5, 6 … 13 for ten rows)
+  has no room: refuse and say so. `lib/rank-order`'s `planMove` is all of
+  this, fuzzed against a re-sort.
+- **`setValue` returns nothing, and the row reads its old value until `save`
+  resolves** (R3). Saves took 295–458 ms each; four one after another 1,397 ms,
+  four in parallel 551 ms, all accepted. **Each save repaints with its new
+  value, and nothing is re-sorted until a re-read** — halfway through, two
+  rows shared a value. So hold the moved order on screen yourself, from the
+  drop until the re-read agrees (with a timeout), and never derive the order
+  from the values while a move saves.
+- **Re-read with `loadExactPage(page)`** past page 1 (above); a refusal is
+  undone by writing every touched row back, not by re-reading (above).
+- **`isEditable(column)` answered `true` for an inactive row, and its save
+  went through** (R4). It is about privileges, not state. Ask it for every row
+  on the page before drawing handles: a move the platform refuses costs a
+  rollback.
+- **Numbering the rows with no value** has to reach all of them at once, since
+  they all sort above every numbered row — numbering some drops those below
+  the rest. Loading more to reach them is out: raising the page size
+  mid-session broke paging on a real subgrid (`pcf-data-table` 0.6.0), and a
+  row on another page has no record to write. So number from the page only
+  when every unnumbered row is on it (the first page, and the list ends there
+  or a numbered row does), just under the first numbered value; tell the user
+  to show more rows otherwise.
+- **The keyboard**: a handle that is a real button; Space lifts, Up and Down
+  move, Space drops, Escape and Tab cancel (Tab not handled, so focus still
+  leaves), each step said in a live region. Reorder the rows live while
+  lifted and put the focus back on the handle — React may move its button to
+  do it. `lib/rank-order`'s `liftKey`.
+- **The pointer**: prevent the default on the handle's `pointerdown` and focus
+  it yourself — a press over cell text started a native `dragstart`, which
+  cancelled the pointer — and read the drag from a ref, because the first
+  move can arrive before React re-renders with the press. Draw a drop line
+  rather than reordering under a captured pointer. Catch `setPointerCapture`:
+  it throws for a pointer the browser does not know.
+- **Another sort, a filter, grouping**: the rows are not in the order, so hide
+  the handles and offer one way back — the order column's sort, the filter
+  row emptied.

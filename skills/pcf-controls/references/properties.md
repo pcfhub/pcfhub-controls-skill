@@ -11,6 +11,8 @@ libraries — and the load failures are in [manifest.md](manifest.md).
   - [`of-type-group` costs more than it looks](#of-type-group-costs-more-than-it-looks)
   - [An output that reports a verdict](#an-output-that-reports-a-verdict)
 - [The bound property is more than `raw`](#the-bound-property-is-more-than-raw)
+  - [A Duration column](#a-duration-column)
+  - [A rollup column](#a-rollup-column)
   - [What a field control sees when the record is saved](#what-a-field-control-sees-when-the-record-is-saved)
   - [Three more things `context` gives you for free](#three-more-things-context-gives-you-for-free)
 
@@ -22,7 +24,7 @@ libraries — and the load failures are in [manifest.md](manifest.md).
 | --- | --- |
 | `SingleLine.Text` | Also `.Email`, `.Phone`, `.URL`, `.TextArea` |
 | `Multiple` | Long text |
-| `Whole.None` | Integer. Also `.Duration`, `.TimeZone`, `.Language` |
+| `Whole.None` | Integer — the only whole-number type `pcf-scripts` builds: `Whole.Duration`, `.TimeZone` and `.Language` fail with pcf-1014. Tell them apart by `attributes.Format` (*A Duration column*, below) |
 | `Decimal`, `FP`, `Currency` | Numeric |
 | `TwoOptions` | Boolean |
 | `OptionSet`, `MultiSelectOptionSet` | Choice columns |
@@ -593,6 +595,51 @@ and over a whole-number Dataverse column alike (a published canvas app,
 An unset number arrives as `0`,
 an unset text as `""`, an unset yes/no as `false`, and only an unset date as
 `null`. One OnChange per committed change (`pcf-number-slider` W8).
+
+### A Duration column
+
+Measured by `pcf-duration-input`'s probe, 30 Oct 2026 (its SPEC.md, P1). A
+Duration column is a whole number of **minutes** with Format *Duration*.
+
+- **Nothing can declare it.** `of-type="Whole.Duration"` fails the build at
+  *Validating manifest* (pcf-1014); the schema's only whole-number type is
+  `Whole.None`.
+- **No designer offers a `Whole.None` control on one.** The modern designer's
+  *+ Component* on a Duration column lists Canvas app alone, where a plain
+  whole number lists every `Whole.None` control; the classic designer's *Add
+  Control* the same. Both **keep and show a binding written into the form
+  XML**.
+- **Bound through the form XML, it works**: `value.type` `Whole.None`,
+  **`attributes.Format` `"1"`** (a plain whole number reads `"0"`), range
+  0 … 2,147,483,647, editable; a write of 90 fired one OnChange 113 ms later and
+  saved. `Xrm`'s `getFormat()` answered `none` for the same column, hours
+  after it was made — read `attributes.Format`, not `Xrm`.
+- **Three texts for one value**: the platform's control showed *1.5 hours*,
+  the `formatted` it handed the PCF *1.50 hours*, the Web API's formatted
+  value *90*. Never scale a visual by a Duration value as if it were a count;
+  name the unit. `pcf-sparkline`, `pcf-grid-data-bars` and
+  `pcf-number-slider` each met "a count of minutes" in their own docs.
+
+### A rollup column
+
+Measured by the same probe (P8), on a whole-number rollup bound through the
+form XML. The formula cannot be written through the Web API (Learn: "We don't
+support defining the formulas with code"); `CalculateRollupField` computes
+one record at once instead of the 12-hour job.
+
+- **It arrives disabled**: the pass's `disabled` `true`, `security.editable`
+  `false`, `attributes.SourceType` `2`. `attributes` carries keys no other
+  column showed: `rollupValid`, `rollupStateField` / `rollupStateValue` (the
+  `_state` companion), `lastUpdatedField` / `lastUpdatedValue` (the `_date`
+  one — an hour later than the Web API's, seconds dropped, not explained) and
+  `recalculate`, a function (not called).
+- **The platform draws the chrome around the control**: *Recalculate* and
+  *Last updated* appear under a PCF on a rollup as under its own control, and a
+  recalculation from there reached the PCF as one pass ~500 ms later.
+- **A write is accepted and thrown away.** `notifyOutputChanged` on the
+  disabled rollup set the attribute and marked it dirty; a Web API `PATCH`
+  of the column answered 204 and kept the old value (`IsValidForUpdate`
+  `false`). Nothing refuses it, so honour `disabled` yourself.
 
 ### What a field control sees when the record is saved
 
