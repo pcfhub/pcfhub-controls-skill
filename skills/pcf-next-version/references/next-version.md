@@ -198,6 +198,19 @@ about the typings, not about the host.** `dataset.sorting` is declared
 is declared present; a control that does not call it reads `allocatedWidth` as
 `-1` forever. Each of those shipped.
 
+**The release imported soon after a probe can wear the probe's stylesheet.**
+Measured by `pcf-barcode-scanner` 0.3.0 (its SPEC.md, 31 Oct 2026): the probe
+imported at 19:52 UTC, the release at 20:38, and the form loaded the release's
+script with the probe's CSS. The CSS URL carries a token —
+`/{639290731520000167}/webresources/cc_<Namespace>.<Control>/css/…`, the first
+import's time in .NET ticks. Under it the server kept returning the old file,
+even to a `cache: 'reload'` fetch, while the same path without the token was
+new. Clearing caches, IndexedDB and a second Publish All did not move it. So
+when a walk after a probe looks unstyled, fetch the stylesheet's own URL
+before suspecting the CSS. If it is stale, take the walk with the old sheet
+disabled and the tokenless one attached, and say so in `SPEC.md`. With both on
+the page, the old rules come later and win ties.
+
 ## What makes a change breaking
 
 Semver on a 0.x control is a weaker promise than it looks, and the useful
