@@ -238,6 +238,10 @@ order; it sends you here between sections 5 and 7, and back.
       throws.
 - [ ] `captureImage` is read as **one** `FileObject`, not an array. Only
       `pickFile` returns many.
+- [ ] A device call is `await`ed inside `try`, not chained with `.catch`. A
+      model-driven form in a desktop browser **throws** from `getBarcodeValue`
+      synchronously, before a promise exists (*Availability is per method and
+      per host…* in `pcf-controls/references/device.md`).
 - [ ] A loop over a device call ends without the user. A host can answer by
       itself — the hub's demo answers `getBarcodeValue` at once, every call —
       so a run that ends only on a refusal never ends there. Look for a repeat

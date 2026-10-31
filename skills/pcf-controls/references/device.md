@@ -37,10 +37,24 @@ context.device.pickFile(options?)              // Promise<FileObject[]>     MANY
 | --- | --- | --- | --- | --- | --- | --- |
 | `pickFile` | yes | yes | yes | **no** | rejects | rejects |
 | `captureImage` / `Audio` / `Video` | yes | yes | yes | **no** | rejects | rejects |
-| `getBarcodeValue` | — | yes | yes | **no** | rejects | rejects |
+| `getBarcodeValue` | **throws** | yes | yes | **no** | rejects | rejects |
 | `getCurrentPosition` | **no** | yes | yes | **no** | rejects | rejects |
 
-Two rows deserve reading twice.
+Three rows deserve reading twice.
+
+**`getBarcodeValue` on a model-driven form in a desktop browser is there, and
+throws synchronously.** Measured by `pcf-barcode-scanner`'s probe 0.2.9 (its
+SPEC.md P1, 31 Oct 2026): `typeof` says `function`, and calling it throws an
+`Error` before any promise exists — *Required method 'Device.getBarcodeValue'
+not supported on this device. Error code:
+PlatformErrorCodes.OperationIsNotSupportedOnThisDevice*. So
+`getBarcodeValue().then(…).catch(…)` never attaches its handlers and the error
+leaves the click handler uncaught, with no message for the user. `await` the
+call inside `try`, which catches a throw and a rejection alike. The same probe showed the control still **loads** there
+with the feature declared `required="true"`, and that `context.device` carries
+`openARViewer` and `getMessageReceiver` besides the six documented methods.
+The other device methods on that host have not been called. The field rig's
+`barcodeThrows` reproduces this.
 
 **`getCurrentPosition` is documented for canvas apps and the model-driven
 *mobile* client.** A model-driven form open in a browser has no geolocation at
