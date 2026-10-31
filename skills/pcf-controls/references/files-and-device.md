@@ -1,8 +1,8 @@
 # Files, and the device
 
 Reading, writing and generating files — three routes to Dataverse, since PCF
-cannot *bind* a File or Image column but can reach one — and the device APIs,
-which are available per method and per host.
+cannot *bind* a File or Image column but can reach one. The device APIs, which
+are available per method and per host, are in [device.md](device.md).
 
 - [Files and binary content](#files-and-binary-content)
   - [Base64 in a text column](#base64-in-a-text-column)
@@ -12,14 +12,7 @@ which are available per method and per host.
   - [Handing the user a file the control generated](#handing-the-user-a-file-the-control-generated)
   - [Putting text on the clipboard](#putting-text-on-the-clipboard)
   - [An icon that has to follow the theme must be inline SVG](#an-icon-that-has-to-follow-the-theme-must-be-inline-svg)
-- [Device APIs](#device-apis)
-  - [Availability is per method and per host, and narrower than it reads](#availability-is-per-method-and-per-host-and-narrower-than-it-reads)
-  - [Absence and refusal are different, and `required="false"` is about absence](#absence-and-refusal-are-different-and-requiredfalse-is-about-absence)
-  - [A device rejection arrives in three shapes and only one is an `Error`](#a-device-rejection-arrives-in-three-shapes-and-only-one-is-an-error)
-  - [Three traps in the types](#three-traps-in-the-types)
-  - [`captureImage` resolves with one file; `pickFile` resolves with many](#captureimage-resolves-with-one-file-pickfile-resolves-with-many)
-  - [What a device API costs the demo, and the maker](#what-a-device-api-costs-the-demo-and-the-maker)
-  - [Testing it](#testing-it)
+- [Device APIs](#device-apis) — moved to device.md
 
 ## Files and binary content
 
@@ -68,7 +61,7 @@ is the largest file that fits — less if the maker set the column's own maximum
 length lower, which a control cannot see on canvas: the `attributes` there
 describe the property, not a column, and their `MaxLength` was `100` on every
 type read (a `Multiple` was not among them — *`attributes` is where canvas and
-model-driven actually diverge* in `references/properties.md`). **Never size a
+model-driven actually diverge* in `references/bound-property.md`). **Never size a
 file against `attributes.MaxLength` without checking a column is behind it.**
 Enforce a limit in the control and refuse up front: the
 platform's own rejection arrives on save, after the file has been read, and says
@@ -520,144 +513,5 @@ depends on one has nothing to show on the hosts a demo runs on.
 
 ## Device APIs
 
-`context.device` is six methods onto native capability, and the reference
-describes them in a sentence each. Everything expensive about them is in what
-happens when they are not there — which is most of the time, on most hosts.
-
-```ts
-context.device.captureAudio()                  // Promise<FileObject>
-context.device.captureImage(options?)          // Promise<FileObject>       ONE
-context.device.captureVideo()                  // Promise<FileObject>
-context.device.getBarcodeValue()               // Promise<string>
-context.device.getCurrentPosition()            // Promise<Position>
-context.device.pickFile(options?)              // Promise<FileObject[]>     MANY
-```
-
-### Availability is per method and per host, and narrower than it reads
-
-| | Model-driven, web | Model-driven, mobile | Canvas | Power Pages | `npm start` | Hub demo |
-| --- | --- | --- | --- | --- | --- | --- |
-| `pickFile` | yes | yes | yes | **no** | rejects | rejects |
-| `captureImage` / `Audio` / `Video` | yes | yes | yes | **no** | rejects | rejects |
-| `getBarcodeValue` | — | yes | yes | **no** | rejects | rejects |
-| `getCurrentPosition` | **no** | yes | yes | **no** | rejects | rejects |
-
-Two rows deserve reading twice.
-
-**`getCurrentPosition` is documented for canvas apps and the model-driven
-*mobile* client.** A model-driven form open in a browser has no geolocation at
-all — which is the host every one of these controls is developed on, and the
-first one anybody tries. It is not a permission problem and not an intermittent
-failure: the API is absent, there is nothing to grant, and a control that
-reports it as an error sends the user looking for a setting that does not exist.
-
-**Power Pages supports no `Device.*` API whatsoever**, nor `Utility`, and its
-documentation states that `<uses-feature>` **must not be set to `true`** there.
-That single line settles the `required` attribute for any control meant to run
-on Pages.
-
-Do not paper over the gaps with the browser's own APIs. Falling back to
-`navigator.geolocation` works in exactly the hosts where the platform declined
-to offer location, and it prompts the user for a permission the app never
-declared, from inside a component. If the platform said no, the honest control
-says no too and names the host that would work.
-
-### Absence and refusal are different, and `required="false"` is about absence
-
-`required="false"` buys the right for the platform to **omit the member**. That
-is a different state from a call that rejects, and it needs a different sentence
-to the user — "not available on this client" is actionable somewhere else,
-"that did not work" is not.
-
-So feature-detect against the type system rather than with it:
-
-```ts
-if (typeof context.device?.getCurrentPosition !== 'function') {
-    // Absent. Say which hosts do have it.
-    return;
-}
-```
-
-Both halves of that guard earn their place. `context.device` is typed as always
-present and Power Pages removes the whole bag; the method is typed as always
-present and `required="false"` removes just it. Neither absence is visible to
-`tsc`.
-
-### A device rejection arrives in three shapes and only one is an `Error`
-
-This is the part that costs an afternoon, and it is documented in the Client API
-reference for `getCurrentPosition`:
-
-| Shape | When | What breaks |
-| --- | --- | --- |
-| `{ code, message }` | the user or the client refused | `String(error)` renders `[object Object]` |
-| **`null`** | an older mobile client, or a device with no geolocation capability — the reference says so outright | `error.message` **throws inside the catch** |
-| `Error` | a browser tab with no native bridge | nothing |
-
-The middle row is the dangerous one. A handler beginning `error.message` throws
-while handling a failure, so the failure handler fails: no message is shown, the
-promise rejects into nothing, and the button sits on its busy label forever. A
-control tested against one refusal is untested against the other two.
-
-Note `code`, where a `webAPI` rejection carries `errorCode`. Two platform APIs,
-two names for the same idea, and one error reader that has to know both — see
-[A webAPI rejection is not an `Error`](context-apis.md#a-platform-rejection-is-not-an-error) for
-the reader, which handles all four shapes.
-
-### Three traps in the types
-
-**`Position.timestamp` is typed `Date` and is a number.** The type definitions
-declare `timestamp: Date`; the `Position` reference page says, of the same
-member, "represented as DOMTimeStamp". The platform sends the number, so
-`position.timestamp.toISOString()` compiles and throws, and nothing in the types
-distinguishes the two. Prefer a timestamp the platform agrees with itself about
-— the record's own `modifiedon` — or coerce defensively and say why.
-
-**`Position['coords']` declares every member non-optional**, including
-`altitude`, `heading`, `speed` and `altitudeAccuracy`, which are routinely
-`null` on a device standing still. Only `latitude`, `longitude` and `accuracy`
-are dependable.
-
-**`CaptureImageOptions` has five non-optional fields** — `allowEdit`,
-`height`, `preferFrontCamera`, `quality`, `width` — so
-`captureImage({ quality: 80 })` does not compile. It is all five or no argument.
-
-### `captureImage` resolves with one file; `pickFile` resolves with many
-
-`Promise<FileObject>` against `Promise<FileObject[]>`. The `[0]` that was right
-on the picker reads `undefined` on the camera, and `undefined.fileContent`
-throws seconds after the camera UI closed — as far from the mistake as a stack
-trace can get.
-
-And `FileObject.fileSize` is in **KB**, which is the same trap
-[Files and binary content](#files-and-binary-content) covers for `pickFile`.
-
-### What a device API costs the demo, and the maker
-
-Every `<uses-feature>` is an install-time permission prompt, so declare only
-what is called — `npm run check` warns on a declared feature nothing uses. And
-any `context.device.*` call means the hub demo cannot be `full`: those methods
-reject outside a real device origin, so what the demo shows is the control's own
-unavailable state. Say which, in `demo.limitations`.
-
-### Testing it
-
-The field rig models **four** device states, and the fourth is the one people
-forget:
-
-```js
-mount({ position: 'no-bridge' })   // rejects with an Error — the default
-mount({ position: 'denied' })      // rejects with { code, message }
-mount({ position: 'unavailable' }) // rejects with null
-mount({ position: 'absent' })      // the METHOD IS NOT THERE
-mount({ device: false })           // the whole bag is not there — Power Pages
-mount({ position: { latitude: 47.6062, longitude: -122.3321, accuracy: 20 } })
-```
-
-`captureImage` takes a `FileObject` or rejects; `pickFile` takes an array or
-rejects. Both default to rejecting, because that is what every host this rig can
-imitate actually does.
-
-Assert that each of the refusals produces a **different** message and that none
-leaves an unhandled rejection. `pcf-geo-stamp` does this in six assertions and
-found a real bug doing it.
+Moved to [device.md](device.md#device-apis) on 31 Oct 2026, when a run of
+scans gave the device a reference of its own.

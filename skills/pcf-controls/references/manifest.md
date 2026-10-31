@@ -370,11 +370,11 @@ Moved to [properties.md](properties.md#property-types), with
 
 ## The bound property is more than `raw`
 
-Moved to [properties.md](properties.md#the-bound-property-is-more-than-raw),
+Moved to [bound-property.md](bound-property.md#the-bound-property-is-more-than-raw),
 with
 
 - **Three more things `context` gives you for free** —
-  [properties.md](properties.md#three-more-things-context-gives-you-for-free)
+  [bound-property.md](bound-property.md#three-more-things-context-gives-you-for-free)
 
 ## "Could not find/invoke <Namespace>.<Control>'s constructor"
 

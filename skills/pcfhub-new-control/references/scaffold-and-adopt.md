@@ -222,7 +222,7 @@ Reach for `standard` more often than instinct suggests: a control that is one
 input and a button does not earn a React tree, and the template's `index.ts` is
 already a working example of the pattern — including the platform state most
 first controls forget, which is covered under
-*The bound property is more than `raw`* in `pcf-controls/references/properties.md`.
+*The bound property is more than `raw`* in `pcf-controls/references/bound-property.md`.
 
 **But do not sell it on bundle size.** Measured on two comparable dataset
 controls, the plain-DOM one packs 7,472 bytes against the React one's 9,262 —

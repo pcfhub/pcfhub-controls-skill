@@ -118,7 +118,7 @@ order; it sends you here between sections 5 and 7, and back.
       `pcf-controls/references/dataset-writing.md`; `_template`'s `lib/rank-order` is the arithmetic.
 - [ ] A field control on a **rollup** column honours `disabled`: the form
       takes a write and marks it dirty, and the server answers 204 and keeps
-      its own value. *A rollup column* in `pcf-controls/references/properties.md`.
+      its own value. *A rollup column* in `pcf-controls/references/bound-property.md`.
 - [ ] Anything compared with a Choice read off a record goes through one
       normaliser: `getValue()` is the string `"3"` on a form, and `===`
       against a number never matches (`pcf-kanban-board` through 0.3.5).
@@ -238,6 +238,11 @@ order; it sends you here between sections 5 and 7, and back.
       throws.
 - [ ] `captureImage` is read as **one** `FileObject`, not an array. Only
       `pickFile` returns many.
+- [ ] A loop over a device call ends without the user. A host can answer by
+      itself — the hub's demo answers `getBarcodeValue` at once, every call —
+      so a run that ends only on a refusal never ends there. Look for a repeat
+      or count guard and a yield between calls. *Scanning many: one call, one
+      code* in `pcf-controls/references/device.md`.
 - [ ] That visible state shows the *message*, not the object. `context.webAPI`
       rejects with a plain `{ errorCode, message }`, so
       `error instanceof Error ? error.message : String(error)` renders the
@@ -425,7 +430,7 @@ rich-text preview. See *Markdown or HTML a user wrote* in
 ### Controls that compare with a saved value
 
 Skip unless the control shows what changed since the record was saved.
-See *What a field control sees when the record is saved* in `pcf-controls/references/properties.md`.
+See *What a field control sees when the record is saved* in `pcf-controls/references/bound-property.md`.
 
 - [ ] The baseline moves only on a pass that names the bound property, carries
       what the control already holds, and arrives when the control has not

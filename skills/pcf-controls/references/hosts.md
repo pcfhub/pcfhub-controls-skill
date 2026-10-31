@@ -19,7 +19,7 @@ cannot be worked around.
 
 | | Model-driven | Canvas | Power Pages |
 | --- | --- | --- | --- |
-| `Device.*` — all six | Yes, but see [Device APIs](files-and-device.md#device-apis) | Yes | **None supported** |
+| `Device.*` — all six | Yes, but see [Device APIs](device.md#device-apis) | Yes | **None supported** |
 | `context.utils` (`Utility`) | Yes | No | **Not supported** |
 | `context.navigation` — `openUrl` | Yes | Yes | Yes |
 | `context.navigation` — `openForm`, `openFile`, `openWebResource` | Yes | **No** — there is no form to open | **No** |

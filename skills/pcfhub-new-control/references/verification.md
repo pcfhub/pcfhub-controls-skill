@@ -193,7 +193,7 @@ absent, which is canvas — and `utils.hasEntityPrivilege` answers yes or no wit
 both enum arguments logged. `events` takes an array of names *or* an object of
 handlers, so a suite can call a payload's callbacks back into the control;
 `events: null` is the host that publishes no bag at all. See [Device
-APIs](../../pcf-controls/references/files-and-device.md#device-apis) and
+APIs](../../pcf-controls/references/device.md#device-apis) and
 [Events](../../pcf-controls/references/navigation-and-events.md#events).
 
 - **The Web API from a fixture**: `retrieveRecord` and `retrieveMultipleRecords`

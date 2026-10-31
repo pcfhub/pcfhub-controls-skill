@@ -258,7 +258,7 @@ What `pcf-code-editor` 1.6.0 added, a diff view (its `SPEC.md`, 2026-10-09):
   which is most form fields.
 - **What it compares with is the hard part**, because a field control is
   never told the record was saved: *What a field control sees when the
-  record is saved* in `properties.md`.
+  record is saved* in `bound-property.md`.
 
 The decisions — which subschemas apply at a path, what to offer, what the
 hover says, whether the caret's line is visible — are pure modules the suite

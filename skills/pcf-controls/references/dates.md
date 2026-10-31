@@ -143,7 +143,7 @@ const behaviorOf = (parameter: ComponentFramework.PropertyTypes.DateTimeProperty
 
 (`columnOf` in the template's scaffolds is the same test for any property —
 *`attributes` is where canvas and model-driven actually diverge* in
-`references/properties.md`.) `pcf-sla-timer` 0.3.0 asks a narrower version,
+`references/bound-property.md`.) `pcf-sla-timer` 0.3.0 asks a narrower version,
 `EntityLogicalName` empty *and* `LogicalName` equal to the property's name.
 
 **A canvas maker cannot say "this is a whole day" through the column, so a

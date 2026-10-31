@@ -93,7 +93,7 @@ Split out of `context-apis.md` on 15 Oct 2026.
 ## [files-and-device.md](files-and-device.md) — Files, and the device
 
 - **Files and binary content** — Reading the file · Writing a file to Dataverse as a Note · Handing the user a file the control generated · An icon that has to follow the theme must be inline SVG
-- **Device APIs** — Availability is per method and per host, and narrower than it reads · Absence and refusal are different, and `required="false"` is about absence · A device rejection arrives in three shapes and only one is an `Error` · Three traps in the types · `captureImage` resolves with one file; `pickFile` resolves with many · What a device API costs the demo, and the maker · Testing it
+- **Device APIs** (in [device.md](device.md) since 31 Oct 2026) — Availability is per method and per host, and narrower than it reads · Absence and refusal are different, and `required="false"` is about absence · A device rejection arrives in three shapes and only one is an `Error` · Three traps in the types · `captureImage` resolves with one file; `pickFile` resolves with many · What a device API costs the demo, and the maker · Testing it
 
 ## [navigation-and-events.md](navigation-and-events.md) — Navigation, dialogs and events
 

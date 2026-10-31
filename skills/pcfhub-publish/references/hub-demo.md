@@ -347,7 +347,7 @@ carries the description a canvas app was read to hand over on 2026-10-06: an
 empty `EntityLogicalName`, the property's own name as `LogicalName` and
 `DisplayName`, `MaxLength: 100`, the type's default range and precision, and a
 date `Behavior` (*`attributes` is where canvas and model-driven actually
-diverge* in `pcf-controls/references/properties.md`). So the canvas host now catches a
+diverge* in `pcf-controls/references/bound-property.md`). So the canvas host now catches a
 control that believes it. The run that introduced it, over every published
 preset, found two: `pcf-choices-picker` 0.1.1 announcing each pill as "value:
 TypeScript" (fixed in 0.1.2), and `pcf-sla-timer` 0.3.0 taking its canvas

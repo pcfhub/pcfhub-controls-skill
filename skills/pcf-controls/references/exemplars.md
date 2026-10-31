@@ -446,7 +446,7 @@ to a field control, what the renderer fetched and left, `openUrl` from a
 press), then walked on the form with a second Code Editor to show another
 control's writes are not a save. Read *Markdown or HTML a user wrote* in
 `rendering-and-hosts.md`, and *What a field control sees when the record is
-saved* in `properties.md`.
+saved* in `bound-property.md`.
 
 ### Reformatting as you type — an input mask
 
@@ -473,7 +473,7 @@ gauges coloured by threshold. The column's kind and range come from
 the column's `Precision` before it is written, so the echo matches; a drag is
 one write. The decisions are three pure modules (`number.ts`, `bands.ts`,
 `echo.ts`) the suite loads from source, and every guard is mutation-tested.
-Read *A bound number column* in `properties.md`, *A drag is one write* in
+Read *A bound number column* in `bound-property.md`, *A drag is one write* in
 `rendering-and-hosts.md` and *A native range, styled as Fluent's Slider* in
 `styling-and-accessibility.md` first. Its `SPEC.md` maps each probe answer
 (P1–P11) to the rule it decided.
@@ -586,7 +586,7 @@ and **the caption says which route the numbers came from**, because a page-sized
 number shown as the whole is the bug this shape exists to avoid. Two routes
 behind one interface, the same grouping pipeline over both; a date category
 paired with a year group and bucketed by the *user's* zone on both routes. Read
-*Aggregating a view through FetchXML* in `lookups-and-fetchxml.md` **first**.
+*Aggregating a view through FetchXML* in `view-aggregates.md` **first**.
 **Measured 2026-09-19: a subgrid's relationship to its parent is invisible**
 (`getFilter()` null, `getLinkedEntities()` empty; the first aggregate counted
 the whole organisation under one account's subgrid), and `mode.contextInfo`

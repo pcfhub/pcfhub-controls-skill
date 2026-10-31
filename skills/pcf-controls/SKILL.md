@@ -44,7 +44,8 @@ of what you would otherwise ask the user for.
 | --- | --- |
 | `references/exemplars.md` | writing any shape or cross-cutting pattern — it names the repository that has already met the traps |
 | `references/manifest.md` | editing `ControlManifest.Input.xml`: features, resources, platform libraries, load failures |
-| `references/properties.md` | choosing a property's `of-type` or a type group, an output, reading what a bound property carries besides `raw`, and telling a save from an echo |
+| `references/properties.md` | choosing a property's `of-type` or a type group, an output |
+| `references/bound-property.md` | reading what a bound property carries besides `raw` — security, validation, metadata, a number, Duration or rollup column — and telling a save from an echo |
 | `references/rendering-and-hosts.md` | writing `index.ts`: standard vs React, `destroy()` and timers, rendering Markdown or HTML a user wrote |
 | `references/bundle-size.md` | a bundle that is bigger than it should be, or choosing a framework by size |
 | `references/hosts.md` | canvas vs model-driven vs Power Pages, updating a control a canvas app already has, full screen |
@@ -54,11 +55,13 @@ of what you would otherwise ask the user for.
 | `references/layout.md` | fitting a table to its host, or laying anything out in a width you measured, narrow included |
 | `references/dates.md` | binding or reading any date column on a field |
 | `references/dates-in-a-dataset.md` | a date read through a view, a timeline, a date control's demo presets |
-| `references/lookups-and-fetchxml.md` | lookup columns, a hierarchy, an aggregate over a view, FetchXML a person types |
+| `references/lookups-and-fetchxml.md` | lookup columns, a hierarchy, a view's rows in a field control, FetchXML a person types |
+| `references/view-aggregates.md` | a count, sum or group over the view a dataset shows |
 | `references/context-apis.md` | `context` beyond the bound value: many-to-many links, web resources, table definitions, privileges |
 | `references/web-api-messages.md` | calling a Web API function or action `context.webAPI` cannot |
 | `references/navigation-and-events.md` | opening forms and URLs, platform dialogs, destructive commands, raising events |
-| `references/files-and-device.md` | files, attachments, `context.device` |
+| `references/files-and-device.md` | files, attachments, File and Image columns, the clipboard |
+| `references/device.md` | `context.device`: which host has which method, refusals, scanning many, testing without a device |
 | `references/grid-customizers.md` | anything that renders cells for the Power Apps grid |
 | `references/styling-and-accessibility.md` | writing `css/<Control>.css` |
 | `references/accessibility.md` | keyboard and screen reader: the Tab a form keeps, a tree or list of your own, live regions |
@@ -191,7 +194,7 @@ gets `raw === null`, which is *not* an empty column), and `attributes` (the
 column's metadata on a form), none needing a declared feature. **A canvas app
 hands over an `attributes` too, about no column** — `MaxLength: 100`, a date
 `Behavior`, a default range — so believe it only when `EntityLogicalName` names
-a table. *The bound property is more than `raw`* in `references/properties.md`
+a table. *The bound property is more than `raw`* in `references/bound-property.md`
 has the code and the measurement.
 
 ### Prove it
