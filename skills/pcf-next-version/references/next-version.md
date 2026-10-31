@@ -105,6 +105,27 @@ whose docs do not say why it rather than the column setting owes its
 `overview.md` a sentence. Read that page with the controls list every run:
 a preview is where the next encroachment shows first.
 
+**And rule out what the host does around a control — from your own
+measurements.** Some requests are about what the platform draws or allows
+*around* a code component, and no control can change that, however well it is
+built. The catalogue had measured two of them before either was offered as a
+release:
+
+- **A rollup column "without the *Last updated* date"** (PCF Gallery 5, Resco
+  2). A code component bound to a rollup column gets *Recalculate* and *Last
+  updated* drawn under it by the platform, exactly as under the platform's own
+  control (*A rollup column* in `pcf-controls/references/bound-property.md`).
+  A control on that column cannot remove them.
+- **A Duration column shown in hours or minutes** (PCF Gallery 7, Resco 4).
+  Neither form designer offers a code component on a Duration column. A
+  binding written into the form XML works, so a maker can only add the control
+  by editing XML (*A Duration column* in the same file). A release on it ships
+  something most makers cannot place.
+
+So before offering a request, search the plugin's references for the column
+type or surface it names. A measured "the host does this" ends the request in
+one read, and the 32nd run (31 Oct 2026) ruled the rollup out that way.
+
 **Sync the rig before the first line.** An old repository's `check-template.mjs`
 and rig predate everything the template has learned since; run
 [`sync-rig.mjs`](../../pcfhub-new-control/references/verification.md#keeping-the-rig-current-sync-rigmjs) and commit the result on
