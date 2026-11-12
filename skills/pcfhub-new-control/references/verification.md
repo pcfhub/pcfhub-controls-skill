@@ -75,6 +75,14 @@ Two consequences worth carrying:
   a value self-assigned trips lint the same way, so reword it to stay valid
   (`if (Math.random() > 2)` rather than `if (false)`). Eight of 29 mutations
   there "killed" the suite on a stale bundle before the runner checked.
+- **A mutant tests the claim a fix makes, not only the code.** Write the
+  check for the case the claim is about, then mutate the fix out: if the
+  check survives, either it tests something else or the claim is wrong.
+  `pcf-kanban-board` 0.6.0 claimed a lane refused through the record left the
+  card unable to move; with the write-back mutated out, a lane-then-lane check
+  still passed — a second lane write replaces the stuck value — and a
+  lane-then-place check failed. The bug was real and narrower than the claim,
+  and the SPEC, the comment and the check were all corrected (2026-11-12).
 
 That second one is the same class of error as `dev/dom.js`'s historic `img.src`
 bug below: **a check that silently reads the wrong thing reports its own

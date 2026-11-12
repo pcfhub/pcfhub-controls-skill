@@ -62,7 +62,14 @@ Split out of `dataset.md` on 15 Oct 2026.
 
 Split out of `dataset-writing-and-layout.md` on 10 Oct 2026.
 
-- **Writing from a dataset control** — The dataset record can write, and the typings do not say so · Two routes, chosen per record · Writing a Status Reason · Writing through the Web API instead · Writing a lookup through the Web API · A second column beside the lane, and Owner · Rows in your own order
+- **Writing from a dataset control** — The dataset record can write, and the typings do not say so · Two routes, chosen per record · Writing a Status Reason · Writing through the Web API instead · Writing a lookup through the Web API · A second column beside the lane, and Owner · A refused save keeps what it was refused with
+
+## [dataset-order.md](dataset-order.md) — Dataset controls: rows and cards in your own order
+
+Split out of `dataset-writing.md` on 12 Nov 2026.
+
+- **Rows in your own order**
+- **Cards on a board**
 
 ## [layout.md](layout.md) — Fitting the host, and narrow widths
 

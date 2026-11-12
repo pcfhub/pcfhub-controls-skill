@@ -115,7 +115,17 @@ order; it sends you here between sections 5 and 7, and back.
       first), offers the move from the keyboard on a real button with each
       step announced, and hides its handles under any other sort, filter or
       grouping with one way back. *Rows in your own order* in
-      `pcf-controls/references/dataset-writing.md`; `_template`'s `lib/rank-order` is the arithmetic.
+      `pcf-controls/references/dataset-order.md`; `_template`'s `lib/rank-order` is the arithmetic.
+- [ ] A **board** that orders cards in a lane plans against the span of
+      **every** loaded card and the column's own range (its attribute
+      definition), not the lane's values — a lane is a slice of what is
+      loaded, and a card valued past the highest loaded leaves it on the next
+      fetch. *Cards on a board* in `pcf-controls/references/dataset-order.md`.
+- [ ] A record-route `save()` that rejects is followed by setting the
+      record's own values back and saving: the record keeps a refused value
+      staged and sends it with its next save of another column. *A refused
+      save keeps what it was refused with* in
+      `pcf-controls/references/dataset-writing.md`.
 - [ ] A field control on a **rollup** column honours `disabled`: the form
       takes a write and marks it dirty, and the server answers 204 and keeps
       its own value. *A rollup column* in `pcf-controls/references/bound-property.md`.

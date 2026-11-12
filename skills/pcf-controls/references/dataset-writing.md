@@ -12,7 +12,8 @@ is in `layout.md`.
   - [Writing through the Web API instead](#writing-through-the-web-api-instead)
   - [Writing a lookup through the Web API](#writing-a-lookup-through-the-web-api)
   - [A second column beside the lane, and Owner](#a-second-column-beside-the-lane-and-owner)
-  - [Rows in your own order](#rows-in-your-own-order)
+  - [A refused save keeps what it was refused with](#a-refused-save-keeps-what-it-was-refused-with)
+  - [Rows in your own order](#rows-in-your-own-order) — moved to `dataset-order.md`
 
 ## Writing from a dataset control
 
@@ -257,6 +258,28 @@ when the record left the view — and a card dropped back in its own lane was
 written again. Its own rig answered a number and hid both; the template's
 answers the string. Read a lane or a choice through one normaliser everywhere
 it is compared.
+
+### A refused save keeps what it was refused with
+
+**Write the record's own values back after a refused `save()`**, measured by
+`pcf-kanban-board` 0.5.4 (its SPEC.md Q7, 2026-11-12): a whole number past
+the column's maximum, through `setValue` + `save()`. The save **rejected**
+— never threw — with a `UciError`; `getValue` and the server kept the old
+value; and **a second `save()` with nothing new set was refused again**, the
+same message. The record keeps the refused value staged and sends it with
+every later save until a `setValue` replaces it. `setValue(original)` +
+`save()` resolved and cleared it.
+
+What that costs a control that does not: a second write of the **same**
+column replaces the stuck value, so nothing looks wrong — but the record's
+next write of **another** column carries the refused one with it, refused
+again, or written once whatever refused it (a business rule) allows it. A
+board's lane refused through the record rode along with the card's next row
+or place change that way from 0.3.0 to 0.5.x. `pcf-data-table` 0.9.0 (R5) saw
+the other face: the refused value showing on the record through a
+`refresh()`. Read each column's value before staging — in the shape
+`setValue` takes back, a Choice as a number, a Yes/No as a boolean — and on
+a rejection set them again and save before passing the refusal on.
 
 ### Writing a Status Reason
 
@@ -572,68 +595,5 @@ it. A control whose writes are choices or lookups is read-only in canvas.
 
 ### Rows in your own order
 
-Letting people put rows in a sequence of their own — a plan's steps, an
-account's priorities — and keeping it for everyone. `pcf-data-table` 0.9.0
-does it; its SPEC.md has the probe (R1–R6) and `_template`'s
-`variants/lib/rank-order` the arithmetic. What it rests on, measured on a
-model-driven subgrid:
-
-- **The order lives in a whole-number column the maker names**, and the
-  table sorts by it, ascending, alone. **A row with no value sorts first**
-  ascending and last descending (R1), so one unnumbered row breaks the order
-  above every numbered one. **A sort the control applied is forgotten on
-  reload** — the first pass arrives with the view's sort — so apply it in
-  `init` every time; the rows are already in the dataset there, so the sort
-  rides the platform's own first fetch.
-- **The column can be left out of the view.** Outside it, `getValue` answers
-  `null` whatever the row holds (R2). `dataset.addColumn(name)` exists on
-  model-driven and brings the value in on the next fetch — and adds the
-  column to `dataset.columns` with `order: -1` and `isHidden: false`, where a
-  control drawing every column draws it. Look the name up first (a
-  same-origin `EntityDefinitions(...)/Attributes(LogicalName=...)`, `AttributeType`
-  `Integer`): a link to a column that does not exist cleared every row
-  (`pcf-data-table` 0.8.0, P11), and nobody has tried `addColumn` with one.
-- **A move reuses the values the rows it passes already hold**, handed out in
-  the new order: 10, 20, 30 stay 10, 20, 30, and only the rows in the span are
-  written. Where that would leave a tie the new order relies on, number a
-  window of the new order with consecutive values, growing it until it fits
-  between its neighbours — **inside the range the page already spans**, except
-  at the open ends of the list, so a move on page 2 never lands among page 3's
-  rows. A middle page whose values are all taken (5, 5, 6 … 13 for ten rows)
-  has no room: refuse and say so. `lib/rank-order`'s `planMove` is all of
-  this, fuzzed against a re-sort.
-- **`setValue` returns nothing, and the row reads its old value until `save`
-  resolves** (R3). Saves took 295–458 ms each; four one after another 1,397 ms,
-  four in parallel 551 ms, all accepted. **Each save repaints with its new
-  value, and nothing is re-sorted until a re-read** — halfway through, two
-  rows shared a value. So hold the moved order on screen yourself, from the
-  drop until the re-read agrees (with a timeout), and never derive the order
-  from the values while a move saves.
-- **Re-read with `loadExactPage(page)`** past page 1 (above); a refusal is
-  undone by writing every touched row back, not by re-reading (above).
-- **`isEditable(column)` answered `true` for an inactive row, and its save
-  went through** (R4). It is about privileges, not state. Ask it for every row
-  on the page before drawing handles: a move the platform refuses costs a
-  rollback.
-- **Numbering the rows with no value** has to reach all of them at once, since
-  they all sort above every numbered row — numbering some drops those below
-  the rest. Loading more to reach them is out: raising the page size
-  mid-session broke paging on a real subgrid (`pcf-data-table` 0.6.0), and a
-  row on another page has no record to write. So number from the page only
-  when every unnumbered row is on it (the first page, and the list ends there
-  or a numbered row does), just under the first numbered value; tell the user
-  to show more rows otherwise.
-- **The keyboard**: a handle that is a real button; Space lifts, Up and Down
-  move, Space drops, Escape and Tab cancel (Tab not handled, so focus still
-  leaves), each step said in a live region. Reorder the rows live while
-  lifted and put the focus back on the handle — React may move its button to
-  do it. `lib/rank-order`'s `liftKey`.
-- **The pointer**: prevent the default on the handle's `pointerdown` and focus
-  it yourself — a press over cell text started a native `dragstart`, which
-  cancelled the pointer — and read the drag from a ref, because the first
-  move can arrive before React re-renders with the press. Draw a drop line
-  rather than reordering under a captured pointer. Catch `setPointerCapture`:
-  it throws for a pointer the browser does not know.
-- **Another sort, a filter, grouping**: the rows are not in the order, so hide
-  the handles and offer one way back — the order column's sort, the filter
-  row emptied.
+Moved to [dataset-order.md](dataset-order.md) on 12 Nov 2026, with *Cards on
+a board* beside it, so each file can be read whole.

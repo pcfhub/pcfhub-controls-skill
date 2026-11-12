@@ -159,7 +159,12 @@ canvas app runs its own copy of the
 control](../../pcf-controls/references/hosts.md#a-canvas-app-runs-its-own-copy-of-the-control).
 Then, on a real form, call it from the
 browser console and paste the answers into `SPEC.md` **verbatim, with the
-date**.
+date**. **Have each call return its answer as well as log it**: a session
+that can drive the form itself — the built-in browser pane, signed in —
+then reads the answers straight back from the call, and `pcf-kanban-board`'s
+0.5.4 probe was answered, all nine questions, in one sitting without a paste
+(2026-11-12). Wait inside the call for what it asks about — a mutator's
+`updateView` with `loading` false — so the answer is the settled one.
 
 **And the environment has to outlive the probe.** A probe is answered on a
 form somebody keeps, and the walkthrough comes back to the same form weeks

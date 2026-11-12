@@ -507,11 +507,22 @@ on every selection change even when the control also tracks its own copy.
 
 **The platform kept the selection through a refresh.** The Assign refreshed the
 subgrid, and the `updateView` that followed still answered all three from
-`getSelectedRecordIds()`. A page turn with a selection is still unmeasured. Keep your
+`getSelectedRecordIds()`. A page turn is measured below. Keep your
 own copy anyway — the ribbon can change the rows behind it (a ribbon Delete
 removes them, and the control hears of it only as their absence) — and let the
 rig's `quirks.selectionDropsOnFetch` (off by default) stand for the page
 turn.
+
+**And a page turn, and a refresh that loses rows — measured 2026-11-12**
+(`pcf-kanban-board` Q8, a subgrid with no command bar). One `updateView`
+followed `setSelectedRecordIds`. The selection **survived `loadNextPage()`**;
+a `refresh()` that put the board back on its first page **kept only the
+selected rows still on it**. And the form sees it without a command bar: the
+subgrid's `getControl(name)` is a `customsubgrid:<namespace>.<constructor>`
+whose `getGrid().getSelectedRows()` listed exactly the ids set, and none
+after `[]` — though the rows a refresh dropped stayed in its copy. So a form
+script can act on a control's selection, and a control should still keep its
+own.
 
 Decide and document one policy for whether selection survives paging, and know
 what each costs. `pcf-data-table` persists it across pages: the ids are stable,
